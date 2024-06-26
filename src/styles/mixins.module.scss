@@ -1,0 +1,17 @@
+@use 'sass:math';
+
+// Colors
+$gray: #777;
+$gray-xx: #ddd;
+$gray-xxx: #eee;
+$accent: #ecb80d;
+
+// Converts px to em with 14px base
+@function rpx($n, $base: 16) {
+  @return ($n * math.div(1, $base)) * 1rem;
+}
+
+// Converts px to em with 14px base
+@function unit($n) {
+  @return rpx($n * 10);
+}

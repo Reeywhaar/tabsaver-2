@@ -1,0 +1,14 @@
+@use './mixins.module' as *;
+
+.button {
+  background-color: $gray-xxx;
+  color: $gray;
+  padding: unit(0.5) unit(1);
+  border-radius: 5px;
+  border: none;
+  transition: background-color 0.3s;
+}
+
+.button:hover {
+  opacity: 0.8;
+}

@@ -1,0 +1,66 @@
+@use '@app/styles/mixins.module' as *;
+
+.window {
+  position: relative;
+}
+
+.window_overlay {
+  background-color: transparentize($color: $accent, $amount: 0.8);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.window_title {
+  padding: unit(0.2) unit(1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-weight: bold;
+}
+
+.window.is_active .window_title {
+  background-color: $gray-xxx;
+}
+
+.tab {
+  padding: unit(0.2) unit(1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: white;
+  user-select: none;
+  z-index: 1;
+  position: relative;
+}
+
+.window.is_active .tab.is_active {
+  background-color: $gray-xxx;
+}
+
+.tab.is_dragover_top {
+  margin-top: -2px;
+  border-top: 2px dotted $accent;
+  z-index: 2;
+}
+
+.tab.is_dragover_bottom {
+  margin-bottom: -2px;
+  border-bottom: 2px dotted $accent;
+  z-index: 2;
+}
+
+.tab_fav {
+  width: rpx(16);
+  height: rpx(16);
+  vertical-align: -2px;
+}
+
+.tab_url {
+  opacity: 0.8;
+  font-style: italic;
+}

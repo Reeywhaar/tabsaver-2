@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "target": "es2019",
+    "module": "esnext",
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "reactNamespace": "React",
+    "jsx": "react",
+    "lib": ["es2019", "DOM", "DOM.Iterable", "ES2022.Error", "ES2023.Array"],
+    "skipLibCheck": true,
+    "incremental": true,
+    "alwaysStrict": true,
+    "baseUrl": "./src",
+    "moduleResolution": "node",
+    "paths": {
+      "@app/*": ["./*"]
+    }
+  },
+  "include": ["./src/**/*"],
+  "exclude": ["node_modules", "ext"]
+}

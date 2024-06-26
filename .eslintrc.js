@@ -1,0 +1,228 @@
+module.exports = {
+  parser: '@babel/eslint-parser',
+  extends: [
+    'eslint:recommended',
+    'plugin:@typescript-eslint/recommended',
+    'prettier',
+    'plugin:import/errors',
+    'plugin:import/warnings',
+    'plugin:import/typescript',
+  ],
+  settings: {
+    'import/resolver': {
+      webpack: {
+        config: __dirname + '/webpack.config.js',
+      },
+    },
+  },
+  env: {
+    node: true,
+    es6: true,
+  },
+  plugins: ['react', 'react-hooks', 'prettier'],
+  parserOptions: {
+    ecmaVersion: 6,
+    sourceType: 'module',
+    requireConfigFile: false,
+    ecmaFeatures: {
+      modules: true,
+      jsx: true,
+      experimentalDecorators: true,
+      legacyDecorators: true,
+    },
+  },
+  rules: {
+    semi: [2, 'never'],
+    strict: [2, 'global'],
+    'no-constant-condition': [2, { checkLoops: false }],
+    'eol-last': [0],
+    quotes: [2, 'single', { avoidEscape: true }],
+    'no-mixed-requires': [0],
+    'no-underscore-dangle': [0],
+    'key-spacing': [0],
+    // following two rules confilict with prettier
+    indent: 'off',
+    '@typescript-eslint/indent': [0],
+
+    'react/jsx-uses-react': 2,
+    'react/jsx-uses-vars': 2,
+    'react/jsx-curly-brace-presence': [2, { props: 'never', children: 'never' }],
+    'no-cond-assign': 1,
+    'no-empty': ['error', { allowEmptyCatch: true }],
+    'no-console': ['error', { allow: ['info', 'warn', 'error'] }],
+    camelcase: 0,
+    'comma-style': 2,
+    'max-nested-callbacks': [2, 5],
+    'no-eval': 2,
+    'no-implied-eval': 2,
+    'no-new-func': 2,
+    'guard-for-in': 2,
+    eqeqeq: 2,
+    'no-else-return': 2,
+    'no-dupe-keys': 2,
+    radix: 2,
+    'no-shadow': 0,
+    'no-delete-var': 2,
+    'no-undef-init': 2,
+    'no-shadow-restricted-names': 2,
+    'handle-callback-err': 2,
+    'no-lonely-if': 2,
+    'constructor-super': 2,
+    'no-this-before-super': 2,
+    'no-dupe-class-members': 2,
+    'no-const-assign': 2,
+    'prefer-spread': 2,
+    'prefer-const': 2,
+    'no-useless-concat': 2,
+    'no-var': 2,
+    'object-shorthand': 2,
+    'prefer-arrow-callback': ['error', { allowNamedFunctions: true }],
+    'prettier/prettier': 2,
+    '@typescript-eslint/no-var-requires': 0,
+    '@typescript-eslint/no-use-before-define': 0,
+    '@typescript-eslint/camelcase': 0,
+    '@typescript-eslint/explicit-module-boundary-types': 0,
+    '@typescript-eslint/no-extra-semi': 0,
+    '@typescript-eslint/ban-types': [
+      'warn',
+      {
+        types: {
+          ShouldFix: { message: 'You should fix this' },
+          String: { message: 'Use string instead', fixWith: 'string' },
+        },
+        extendDefaults: false,
+      },
+    ],
+    'no-unused-vars': 0,
+    'require-atomic-updates': 0,
+    '@typescript-eslint/ban-ts-ignore': 0,
+    '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '(^_$|^_[a-zA-Z0-9])', args: 'all' }],
+    '@typescript-eslint/member-delimiter-style': [
+      'error',
+      {
+        multiline: {
+          delimiter: 'none',
+          requireLast: true,
+        },
+        singleline: {
+          delimiter: 'semi',
+          requireLast: false,
+        },
+      },
+    ],
+    '@typescript-eslint/no-inferrable-types': 0,
+    '@typescript-eslint/explicit-function-return-type': 0,
+    'no-redeclare': 0,
+    '@typescript-eslint/no-redeclare': 2,
+    'react/jsx-key': 2,
+    'react-hooks/rules-of-hooks': 2,
+    'react-hooks/exhaustive-deps': ['error', { additionalHooks: '(useAsyncEffect|useCreateSelector|useLayoutEffectForce)' }],
+    'import/newline-after-import': ['error', { count: 1 }],
+    'import/extensions': [
+      'error',
+      'always',
+      {
+        ts: 'never',
+        tsx: 'never',
+        js: 'never',
+        jsx: 'never',
+      },
+    ],
+    'no-warning-comments': ['warn', { terms: ['todo', 'temp'], location: 'start' }],
+    'no-restricted-imports': [
+      'error',
+      {
+        paths: [
+          { name: 'moment', message: 'Use @app/utils/moment' },
+          { name: 'moment-timezone', message: 'Use @app/utils/moment' },
+          { name: 'lodash', message: 'Use lodash/*' },
+        ],
+        patterns: [
+          {
+            group: ['*/**/*.server', '*/**/*.server/**'],
+            message: 'Do not import server specific code, use general',
+          },
+          {
+            group: ['*/**/*.client', '*/**/*.client/**'],
+            message: 'Do not import browser specific code, use general',
+          },
+        ],
+      },
+    ],
+    'no-restricted-syntax': ['error', { selector: "CallExpression[callee.name='unimplemented']", message: 'Unimplemented must be implemented.' }],
+    'react/jsx-sort-props': 2,
+    '@typescript-eslint/no-unnecessary-type-constraint': 0,
+    'sort-imports': ['error', { ignoreCase: true, ignoreDeclarationSort: true }],
+  },
+  overrides: [
+    {
+      files: ['*.ts', '*.tsx'],
+      plugins: ['@typescript-eslint', 'deprecation'],
+      parser: '@typescript-eslint/parser',
+      parserOptions: {
+        project: './tsconfig.json',
+        tsconfigRootDir: __dirname,
+        experimentalDecorators: true,
+      },
+      rules: {
+        '@typescript-eslint/interface-name-prefix': 0,
+        // disabling because it's bad practice to mark accessibility in react classes
+        '@typescript-eslint/explicit-member-accessibility': 0,
+        // doesn't work in real world
+        '@typescript-eslint/no-non-null-assertion': 0,
+        // disabling because store actions use WATCH_ME_IM_SPECIAL case
+        '@typescript-eslint/class-name-casing': 0,
+        // maybe good but I have just tired to type return types everywhere, especially with complex generic return types
+        '@typescript-eslint/explicit-function-return-type': 0,
+        // next two disabled for migration period, then should be disabled only in tests
+        '@typescript-eslint/no-explicit-any': 0,
+        '@typescript-eslint/no-object-literal-type-assertion': 0,
+        '@typescript-eslint/no-unnecessary-type-assertion': 2,
+        '@typescript-eslint/switch-exhaustiveness-check': 2,
+        'import/named': 0,
+        'import/namespace': 0,
+        'import/default': 0,
+        'import/no-named-as-default-member': 0,
+        'import/no-named-as-default': 0,
+        'import/no-cycle': 0,
+        'import/no-unused-modules': 0,
+        'import/no-deprecated': 0,
+        'deprecation/deprecation': 'warn',
+      },
+    },
+    {
+      files: ['*.d.ts'],
+      rules: {
+        'no-var': 0,
+        'no-dupe-class-members': 0,
+        '@typescript-eslint/no-unused-vars': 0,
+      },
+    },
+    {
+      files: ['*.test.ts', '*.test.tsx', '*.test.js', '*.test.jsx', '*.bench.ts', '*.bench.tsx', '*.bench.js', '*.bench.jsx'],
+      rules: {
+        '@typescript-eslint/no-empty-function': 0,
+        'max-nested-callbacks': 0,
+      },
+      globals: {
+        // jest related
+        describe: true,
+        expect: true,
+        jest: true,
+        it: true,
+      },
+    },
+  ],
+  globals: {
+    cn: true,
+    document: true,
+    window: true,
+    console: true,
+    navigator: true,
+    localStorage: true,
+    fetch: true, // available on both server and client contexts with "isomorphic-fetch"
+    IS_BROWSER: 'readonly',
+    Ya: 'readonly',
+    ymaps: 'readonly',
+  },
+}
