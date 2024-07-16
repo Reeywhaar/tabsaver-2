@@ -3,14 +3,17 @@ const webpack = require('webpack')
 const HtmlWebpackPlugin = require('html-webpack-plugin')
 const SvgMakerPlugin = require('@reeywhaar/svgmaker/webpack-plugin')
 
+require('dotenv').config({ path: './.env' })
+
 // Handle docker's SIGINT
 process.on('SIGINT', () => {
   console.warn('\nGot "SIGINT", exiting...')
   process.exit(0)
 })
 
-module.exports = (_h, args) => {
+module.exports = async (_h, args) => {
   const isProduction = args.mode === 'production'
+  const WebExtPlugin = (await import('web-ext-plugin')).default
 
   return [
     {
@@ -117,7 +120,14 @@ module.exports = (_h, args) => {
           })
         }),
         ...['./icon.svg.js', './icon-light.svg.js'].map(file => new SvgMakerPlugin({ file, output: '../icons' })),
-      ],
+        args.watch
+          ? new WebExtPlugin({
+              sourceDir: path.resolve(__dirname, 'ext'),
+              firefoxProfile: process.env.WEB_EXT_FIREFOX_PROFILE,
+              runLint: false,
+            })
+          : null,
+      ].filter(x => !!x),
       optimization: {
         minimize: args.mode !== 'development',
         splitChunks: {
