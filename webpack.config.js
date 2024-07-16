@@ -120,7 +120,7 @@ module.exports = async (_h, args) => {
           })
         }),
         ...['./icon.svg.js', './icon-light.svg.js'].map(file => new SvgMakerPlugin({ file, output: '../icons' })),
-        args.watch
+        args.watch && process.env.RUN_FIREFOX
           ? new WebExtPlugin({
               sourceDir: path.resolve(__dirname, 'ext'),
               firefoxProfile: process.env.WEB_EXT_FIREFOX_PROFILE,
