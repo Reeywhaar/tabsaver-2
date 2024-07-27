@@ -139,6 +139,40 @@ describe('SessionsManager', () => {
     await manager.windowRemovedHandler(1)
     expect(manager.data.windows.map(w => w.id)).toStrictEqual([0])
   })
+
+  it('updateStoredData', async () => {
+    br = {
+      ...br,
+      sessions: {
+        ...br.sessions,
+        getWindowValue: async id => (id === 0 ? '0' : undefined),
+      },
+    }
+    const manager = new SessionsManager({
+      browserApi: br,
+      data: { ...createTestSessions(), windows: [{ id: 0, focused: true, session_id: '0' }, { id: 1 }] },
+      storedData: {
+        windows: [
+          {
+            session_id: '0',
+            title: 'title',
+          },
+        ],
+        tabs: [],
+      },
+    })
+    await manager.updateStoredData()
+    expect(manager.storedData).toStrictEqual({
+      tabs: [
+        { id: '0.0', index: 0, url: 'https://example.com', window_session_id: '0' },
+        { id: '0.1', index: 1, url: 'https://example.com', window_session_id: '0' },
+        { id: '0.2', index: 2, url: 'https://example.com', window_session_id: '0' },
+        { id: '0.3', index: 3, url: 'https://example.com', window_session_id: '0' },
+        { id: '0.4', index: 4, url: 'https://example.com', window_session_id: '0' },
+      ],
+      windows: [{ session_id: '0', title: 'title' }],
+    })
+  })
 })
 
 const windowIndexes: Record<number, number> = {}
@@ -202,5 +236,8 @@ const createBrowser = (): typeof browser =>
   ({
     runtime: {
       sendMessage: () => {},
+    },
+    sessions: {
+      getWindowValue: async () => undefined,
     },
   }) as any

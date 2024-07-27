@@ -1,7 +1,9 @@
 import { DEFAULT_COOKIE_STORE_ID, SESSION_KEY } from './constants'
 import { createSortHandler } from './createSortHandler'
-import { OutgoingMessageDescriptor, SavedSessionsDescriptor, SessionsDescriptor, TabDescriptor, WindowDescriptor } from './types'
+import { OutgoingMessageDescriptor, SavedSessionsDescriptor, SavedTabDescriptor, SessionsDescriptor, TabDescriptor, WindowDescriptor } from './types'
+import { isNil } from './utils/isNil'
 import { isNotNil } from './utils/isNotNil'
+import { serialize } from './utils/serialize'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -64,7 +66,7 @@ export class SessionsManager {
     if (!stab) return
 
     this.data.tabs = sortTabs([...this.data.tabs, stab])
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabActivatedHandler = async ({ tabId, windowId }: browser.tabs._OnActivatedActiveInfo) => {
@@ -75,7 +77,7 @@ export class SessionsManager {
     })
 
     this.sortTabs()
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabMovedHandler = async (tabId: number, info: browser.tabs._OnMovedMoveInfo) => {
@@ -91,7 +93,7 @@ export class SessionsManager {
       }
     })
     this.sortTabs()
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabDetachedHandler = async (tabId: number, info: browser.tabs._OnDetachedDetachInfo) => {
@@ -105,7 +107,7 @@ export class SessionsManager {
     })
 
     this.sortTabs()
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabAttachedHandler = async (tabId: number, info: browser.tabs._OnAttachedAttachInfo) => {
@@ -118,7 +120,7 @@ export class SessionsManager {
       return { ...t, index: t.index >= info.newPosition ? t.index + 1 : t.index }
     })
     this.sortTabs()
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabUpdatedHandler = async (tabId: number, _info: browser.tabs._OnUpdatedChangeInfo, otab: browser.tabs.Tab) => {
@@ -134,7 +136,7 @@ export class SessionsManager {
       })
       this.sortTabs()
     }
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabReplacedHandler = async (addedTabId: number, removedTabId: number) => {
@@ -146,7 +148,7 @@ export class SessionsManager {
       return t
     })
     this.sortTabs()
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   tabRemovedHandler = async (tabId: number, info: browser.tabs._OnRemovedRemoveInfo) => {
@@ -160,7 +162,7 @@ export class SessionsManager {
       return { ...t, index: index++ }
     })
     this.sortTabs()
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   windowCreatedHandler = async (window: browser.windows.Window) => {
@@ -169,7 +171,7 @@ export class SessionsManager {
     const swindow = await this.serializeWindow(window)
     if (!swindow) return
     this.data.windows.push(swindow)
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   windowFocusChangedHandler = async (windowId: number) => {
@@ -178,7 +180,7 @@ export class SessionsManager {
     this.data.windows = this.data.windows.map(w => {
       return { ...w, focused: w.id === windowId ? true : undefined }
     })
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   windowRemovedHandler = async (windowId: number) => {
@@ -186,15 +188,28 @@ export class SessionsManager {
     const windowIndex = this.data.windows.findIndex(w => w.id === windowId)
     if (windowIndex === -1) return
     this.data.windows.splice(windowIndex, 1)
-    this.sendDataUpdate()
+    await this.triggerUpdate()
   }
 
   private sortTabs() {
     this.data.tabs = sortTabs(this.data.tabs)
   }
 
-  sendDataUpdate() {
+  async triggerUpdate() {
+    await this.updateStoredData()
     this.sendMessage({ type: 'update', data: this.data, storedData: this.storedData })
+  }
+
+  async updateStoredData() {
+    const openedStoredWindows = this.data.windows.filter(w => !!w.session_id)
+    const openedStoredWindowsSessionIds = openedStoredWindows.map(w => w.session_id)
+    const storedWindowsIds = openedStoredWindows.map(w => w.id)
+    const inactiveStoredWindows = this.storedData.windows.filter(w => !openedStoredWindowsSessionIds.includes(w.session_id))
+    const inactiveStoredWindowsIds = inactiveStoredWindows.map(w => w.session_id)
+    const tabsToStore = this.data.tabs.filter(t => isNotNil(t.window_id) && storedWindowsIds.includes(t.window_id))
+    const newStoredTabs = (await Promise.all(tabsToStore.map(t => this.convertTabToStoredTab(t)))).filter(isNotNil)
+    const storedTabs = [...this.storedData.tabs.filter(t => inactiveStoredWindowsIds.includes(t.window_session_id))]
+    this.storedData.tabs = sortStoredTabs([...storedTabs, ...newStoredTabs])
   }
 
   sendMessage(message: OutgoingMessageDescriptor) {
@@ -219,6 +234,22 @@ export class SessionsManager {
       return r
     }) as T
   }
+
+  async convertTabToStoredTab(tab: TabDescriptor): Promise<SavedTabDescriptor | null> {
+    if (isNil(tab.id) || isNil(tab.window_id) || !tab.url) return null
+    const sessionId = asString(await this.br.sessions.getWindowValue(tab.window_id, SESSION_KEY))
+    if (!sessionId) return null
+    return serialize({
+      // TODO: better approach to generate stable id
+      id: `${sessionId}.${tab.id}`,
+      index: tab.index,
+      url: tab.url,
+      window_session_id: sessionId,
+      cookie_store_id: tab.cookie_store_id,
+      favicon_url: tab.favicon_url,
+      title: tab.title,
+    })
+  }
 }
 
 function asString(value: any): string | undefined {
@@ -227,6 +258,14 @@ function asString(value: any): string | undefined {
 
 function sortTabs(tabs: TabDescriptor[]): TabDescriptor[] {
   return tabs.sort(createSortHandler(t => [t.window_id ? -t.window_id : 0, -t.index]))
+}
+
+function sortStoredTabs(tabs: SavedTabDescriptor[]): SavedTabDescriptor[] {
+  return tabs.sort((a, b) => {
+    const cw = a.window_session_id.localeCompare(b.window_session_id)
+    if (cw !== 0) return cw
+    return a.index - b.index
+  })
 }
 
 function serializeTab(tab: browser.tabs.Tab): TabDescriptor | null {

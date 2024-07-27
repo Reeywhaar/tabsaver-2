@@ -43,7 +43,7 @@ async function main() {
     console.info('[tabsaver] [background] Incoming message', message)
     switch (message.type) {
       case 'getData': {
-        return manager.sendDataUpdate()
+        return manager.triggerUpdate()
       }
     }
   })
