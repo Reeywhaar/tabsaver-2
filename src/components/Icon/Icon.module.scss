@@ -5,6 +5,13 @@
 
 .icon {
   font-family: Icons;
+  width: 1em;
+  height: 1em;
   font-size: 1em;
   vertical-align: 0.1em;
+  display: inline-block;
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
