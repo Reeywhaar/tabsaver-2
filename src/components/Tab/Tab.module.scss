@@ -2,16 +2,23 @@
 
 .tab {
   padding: unit(0.2) unit(1);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
   background-color: white;
   user-select: none;
   z-index: 1;
   position: relative;
+  display: flex;
+  gap: unit(0.5);
+  align-items: center;
 }
 
-.window.is_active .tab.is_active {
+.tab_label {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+.tab.is_window_active.is_active {
   background-color: $gray-xxx;
 }
 
@@ -36,4 +43,8 @@
 .tab_url {
   opacity: 0.8;
   font-style: italic;
+}
+
+.spacer {
+  flex: 1 0 auto;
 }

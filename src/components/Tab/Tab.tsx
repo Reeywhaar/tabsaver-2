@@ -1,20 +1,30 @@
 import { TabDescriptor, WindowDescriptor } from '@app/types'
-import React, { FunctionComponent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import React, { FunctionComponent, ReactNode, useEffect, useRef, useState } from 'react'
 import { useBrowser } from '../DataProvider'
 import { DRAGGABLE_TAB_MIME } from '@app/constants'
 import { extractTabData } from '@app/utils/tabData'
 import classNames from 'classnames'
 
 import classes from './Tab.module.scss'
+import { Icon } from '../Icon/Icon'
+import { useClickHandler } from '@app/hooks/useClickHandler'
 
 export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescriptor }> = ({ tab, window }) => {
   const rootRef = useRef<HTMLDivElement>(null)
   const browser = useBrowser()
   const [dragover, setDragover] = useState<null | 'top' | 'bottom'>()
 
-  const activateTab = useCallback(() => {
-    browser.tabs.update(tab.id, { active: true })
-  }, [browser.tabs, tab.id])
+  const activateHandler = useClickHandler(async () => {
+    if (window) await browser.windows.update(window.id, { focused: true })
+    await browser.tabs.update(tab.id, { active: true })
+  })
+
+  const removeHandler = useClickHandler(async e => {
+    console.info(`[Tab] removing tab with id ${tab.id}`)
+    e.preventDefault()
+    e.stopPropagation()
+    await browser.tabs.remove(tab.id)
+  })
 
   useEffect(() => {
     const el = rootRef.current!
@@ -102,12 +112,16 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
         dragover === 'top' ? classes.is_dragover_top : dragover === 'bottom' ? classes.is_dragover_bottom : null
       )}
       draggable={true}
-      onClick={activateTab}
       ref={rootRef}
       title={tab.url}
+      {...activateHandler}
     >
-      {isFaviconIncluded(tab.favicon_url) && <img alt="" className={classes.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />} {label}{' '}
-      {!excludedURLS.includes(tab.url) && <span className={classes.tab_url}>{tab.url}</span>}
+      {isFaviconIncluded(tab.favicon_url) && <img alt="" className={classes.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />}
+      <div className={classes.tab_label}>
+        {label} {!excludedURLS.includes(tab.url) && <span className={classes.tab_url}>{tab.url}</span>}
+      </div>
+      <div className={classes.spacer} />
+      <Icon name="close" {...removeHandler} />
     </div>
   )
 }
