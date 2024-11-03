@@ -1,0 +1,39 @@
+@use '@app/styles/mixins.module' as *;
+
+.tab {
+  padding: unit(0.2) unit(1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  background-color: white;
+  user-select: none;
+  z-index: 1;
+  position: relative;
+}
+
+.window.is_active .tab.is_active {
+  background-color: $gray-xxx;
+}
+
+.tab.is_dragover_top {
+  margin-top: -2px;
+  border-top: 2px dotted $accent;
+  z-index: 2;
+}
+
+.tab.is_dragover_bottom {
+  margin-bottom: -2px;
+  border-bottom: 2px dotted $accent;
+  z-index: 2;
+}
+
+.tab_fav {
+  width: rpx(16);
+  height: rpx(16);
+  vertical-align: -2px;
+}
+
+.tab_url {
+  opacity: 0.8;
+  font-style: italic;
+}
