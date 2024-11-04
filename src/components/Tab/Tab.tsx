@@ -8,6 +8,7 @@ import classNames from 'classnames'
 import classes from './Tab.module.scss'
 import { Icon } from '../Icon/Icon'
 import { useClickHandler } from '@app/hooks/useClickHandler'
+import { Spacer } from '../Spacer/Spacer'
 
 export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescriptor }> = ({ tab, window }) => {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -120,6 +121,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
       <div className={classes.tab_label}>
         {label} {!excludedURLS.includes(tab.url) && <span className={classes.tab_url}>{tab.url}</span>}
       </div>
+      <Spacer />
       <div className={classes.spacer} />
       <Icon name="close" {...removeHandler} />
     </div>

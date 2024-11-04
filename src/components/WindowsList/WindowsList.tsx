@@ -1,4 +1,4 @@
-import React, { FunctionComponent, ReactNode, useCallback, useEffect, useRef, useState } from 'react'
+import React, { FunctionComponent, ReactNode, useEffect, useRef, useState } from 'react'
 import { useBrowser, useSessions, useStoredSessions } from '@app/components/DataProvider'
 import classnames from 'classnames'
 
@@ -7,6 +7,9 @@ import { WindowDescriptor } from '@app/types'
 import { DRAGGABLE_TAB_MIME } from '@app/constants'
 import { Tab } from '../Tab/Tab'
 import { extractTabData } from '@app/utils/tabData'
+import { useClickHandler } from '@app/hooks/useClickHandler'
+import { Icon } from '../Icon/Icon'
+import { Spacer } from '../Spacer/Spacer'
 
 export const WindowsList: FunctionComponent = () => {
   const { windows } = useSessions()
@@ -27,9 +30,13 @@ const Window: FunctionComponent<{ window: WindowDescriptor; index: number }> = (
   const [dragover, setDragover] = useState(false)
   const { windows: storedWindows } = useStoredSessions()
 
-  const activateWindow = useCallback(() => {
-    browser.windows.update(window.id, { focused: true })
-  }, [browser.windows, window.id])
+  const activateHandler = useClickHandler(async () => {
+    await browser.windows.update(window.id, { focused: true })
+  })
+
+  const closeHandler = useClickHandler(async () => {
+    await browser.windows.remove(window.id)
+  })
 
   useEffect(() => {
     const el = titleRef.current!
@@ -79,9 +86,11 @@ const Window: FunctionComponent<{ window: WindowDescriptor; index: number }> = (
   const storedSession = (window.session_id && storedWindows.find(w => w.session_id === window.session_id)) || null
   const label: ReactNode = storedSession ? storedSession.title : `Window ${index + 1}`
   return (
-    <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id} onClick={activateWindow}>
-      <div className={classes.window_title} ref={titleRef}>
-        {label}
+    <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id}>
+      <div className={classes.window_title} ref={titleRef} {...activateHandler}>
+        <div>{label}</div>
+        <Spacer />
+        <Icon name="close" {...closeHandler} />
       </div>
       {windowTabs.map(tab => (
         <Tab key={tab.id} tab={tab} window={window} />

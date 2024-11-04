@@ -16,6 +16,11 @@
 }
 
 .window_title {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  flex-direction: row;
+  gap: unit(0.5);
   padding: unit(0.2) unit(1);
   white-space: nowrap;
   overflow: hidden;
