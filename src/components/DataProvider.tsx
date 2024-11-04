@@ -1,23 +1,32 @@
-import React, { createContext, FunctionComponent, PropsWithChildren, useContext, useEffect, useState } from 'react'
+import React, { createContext, FunctionComponent, PropsWithChildren, useContext, useEffect, useMemo, useState } from 'react'
 import { OutgoingMessageDescriptor, SavedSessionsDescriptor, SessionsDescriptor } from '@app/types'
 import { sendRuntimeMessage } from '@app/utils/sendRuntimeMessage'
+import { useEvent } from '@app/hooks/useEvent'
 
 export type Data = {
   sessions: SessionsDescriptor
-  storedSessings: SavedSessionsDescriptor
+  storedSessions: SavedSessionsDescriptor
   br: typeof browser
 }
 
-const DataProviderContext = createContext<Data>({
+type DataUpdateContext = {
+  updateStoredSessions: (updater: (data: SavedSessionsDescriptor) => SavedSessionsDescriptor) => void
+}
+
+const DataContext = createContext<Data>({
   sessions: {
     windows: [],
     tabs: [],
   },
-  storedSessings: {
+  storedSessions: {
     windows: [],
     tabs: [],
   },
   br: browser,
+})
+
+const DataUpdateProviderContext = createContext<DataUpdateContext>({
+  updateStoredSessions: () => {},
 })
 
 export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof browser }>> = ({ br, children }) => {
@@ -26,12 +35,30 @@ export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof brow
       windows: [],
       tabs: [],
     },
-    storedSessings: {
+    storedSessions: {
       windows: [],
       tabs: [],
     },
     br: browser,
   })
+
+  const updateStoredSessions = useEvent<DataUpdateContext['updateStoredSessions']>(updater => {
+    setData(prev => {
+      const newData = {
+        ...prev,
+        storedSessions: updater(prev.storedSessions),
+      }
+      sendRuntimeMessage(br, { type: 'updateStoredData', storedData: newData.storedSessions })
+      return newData
+    })
+  })
+
+  const updateContext = useMemo<DataUpdateContext>(
+    () => ({
+      updateStoredSessions,
+    }),
+    [updateStoredSessions]
+  )
 
   useEffect(() => {
     sendRuntimeMessage(br, { type: 'getData' })
@@ -41,7 +68,7 @@ export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof brow
         case 'update':
           setData({
             sessions: message.data,
-            storedSessings: message.storedData,
+            storedSessions: message.storedData,
             br: browser,
           })
       }
@@ -54,17 +81,25 @@ export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof brow
     }
   }, [br])
 
-  return <DataProviderContext.Provider value={data}>{children}</DataProviderContext.Provider>
+  return (
+    <DataContext.Provider value={data}>
+      <DataUpdateProviderContext.Provider value={updateContext}>{children}</DataUpdateProviderContext.Provider>
+    </DataContext.Provider>
+  )
 }
 
 export const useSessions = () => {
-  return useContext(DataProviderContext).sessions
+  return useContext(DataContext).sessions
 }
 
 export const useStoredSessions = () => {
-  return useContext(DataProviderContext).storedSessings
+  return useContext(DataContext).storedSessions
+}
+
+export const useDataUpdate = () => {
+  return useContext(DataUpdateProviderContext)
 }
 
 export const useBrowser = () => {
-  return useContext(DataProviderContext).br
+  return useContext(DataContext).br
 }

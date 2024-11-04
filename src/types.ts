@@ -48,6 +48,11 @@ export type OutgoingMessageDescriptor = {
   storedData: SavedSessionsDescriptor
 }
 
-export type IncomingMessageDescriptor = {
-  type: 'getData'
-}
+export type IncomingMessageDescriptor =
+  | {
+      type: 'getData'
+    }
+  | {
+      type: 'updateStoredData'
+      storedData: SavedSessionsDescriptor
+    }

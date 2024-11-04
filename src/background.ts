@@ -1,26 +1,10 @@
 import { IncomingMessageDescriptor } from './types'
 import { SessionsManager } from './SessionsManager'
+import { assertNever } from './utils/assertNever'
 
 async function main() {
   const manager = new SessionsManager({
     browserApi: browser,
-    storedData: {
-      tabs: [
-        {
-          id: '0',
-          index: 0,
-          url: 'https://example.com',
-          window_session_id: '0',
-          title: 'Example website',
-        },
-      ],
-      windows: [
-        {
-          session_id: '0',
-          title: 'Saved tab set',
-        },
-      ],
-    },
   })
   manager.logger = console
 
@@ -43,8 +27,15 @@ async function main() {
     console.info('[tabsaver] [background] Incoming message', message)
     switch (message.type) {
       case 'getData': {
-        return manager.triggerUpdate()
+        await manager.triggerUpdate()
+        return
       }
+      case 'updateStoredData': {
+        manager.storedData = message.storedData
+        return
+      }
+      default:
+        assertNever(message)
     }
   })
 }
