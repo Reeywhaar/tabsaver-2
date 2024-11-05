@@ -56,3 +56,7 @@ export type IncomingMessageDescriptor =
       type: 'updateStoredData'
       storedData: SavedSessionsDescriptor
     }
+  | {
+      type: 'openSession'
+      id: string
+    }

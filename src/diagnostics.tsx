@@ -1,6 +1,6 @@
 import React, { FunctionComponent } from 'react'
 import { createRoot } from 'react-dom/client'
-import { DataProvider, useDataUpdate, useSessions, useStoredSessions } from './components/DataProvider'
+import { DataProvider, useBrowser, useDataUpdate, useSessions, useStoredSessions } from './components/DataProvider'
 import { useEvent } from './hooks/useEvent'
 
 function main() {
@@ -17,6 +17,7 @@ const App: FunctionComponent = () => {
 }
 
 const Diagnostics: FunctionComponent = () => {
+  const browser = useBrowser()
   const data = useSessions()
   const storedData = useStoredSessions()
   const { updateStoredSessions } = useDataUpdate()
@@ -37,21 +38,60 @@ const Diagnostics: FunctionComponent = () => {
           url: 'https://example.com',
           title: 'Example',
         },
+        {
+          id: '535',
+          index: 1,
+          window_session_id: '123',
+          url: 'https://vyrtsev.com',
+          title: 'Vyrtsev',
+        },
       ],
     }))
+  })
+
+  const handleOpenTestWindows = useEvent(() => {
+    browser.windows.create({
+      url: [
+        //
+        'https://example.com',
+        'https://ya.ru',
+        'https://google.com',
+        'https://wikipedia.org',
+      ],
+    })
+
+    browser.windows.create({
+      url: [
+        //
+        'https://vyrtsev.com',
+        'https://ya.ru',
+        'https://google.com',
+        'https://wikipedia.org',
+      ],
+    })
   })
 
   return (
     <div>
       <h1>Diagnostics</h1>
-      <p>Import data</p>
-      <div>
-        <button onClick={handleImport}>Import data</button>
-      </div>
-      <p>Some diagnostic information</p>
-      <div>
-        <code style={{ whiteSpace: 'pre', fontSize: '0.8rem' }}>{JSON.stringify({ data, storedData }, null, 2)}</code>
-      </div>
+      <section>
+        <p>Import data</p>
+        <div>
+          <button onClick={handleImport}>Import data</button>
+        </div>
+      </section>
+      <section>
+        <p>Open test windows</p>
+        <div>
+          <button onClick={handleOpenTestWindows}>Open test windows</button>
+        </div>
+      </section>
+      <section>
+        <p>Some diagnostic information</p>
+        <div>
+          <code style={{ whiteSpace: 'pre', fontSize: '0.8rem' }}>{JSON.stringify({ data, storedData }, null, 2)}</code>
+        </div>
+      </section>
     </div>
   )
 }

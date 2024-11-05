@@ -122,7 +122,6 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
         {label} {!excludedURLS.includes(tab.url) && <span className={classes.tab_url}>{tab.url}</span>}
       </div>
       <Spacer />
-      <div className={classes.spacer} />
       <Icon name="close" {...removeHandler} />
     </div>
   )

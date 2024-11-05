@@ -1,6 +1,6 @@
 import { IncomingMessageDescriptor } from './types'
 import { SessionsManager } from './SessionsManager'
-import { assertNever } from './utils/assertNever'
+import { assertNeverSilent } from './utils/assertNever'
 
 async function main() {
   const manager = new SessionsManager({
@@ -34,8 +34,12 @@ async function main() {
         manager.storedData = message.storedData
         return
       }
+      case 'openSession': {
+        await manager.openStoredSession(message.id)
+        return
+      }
       default:
-        assertNever(message)
+        assertNeverSilent(message)
     }
   })
 }

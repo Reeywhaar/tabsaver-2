@@ -1,0 +1,35 @@
+@use '@app/styles/mixins.module' as *;
+
+.window {
+  position: relative;
+}
+
+.window_overlay {
+  background-color: transparentize($color: $accent, $amount: 0.8);
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 3;
+  pointer-events: none;
+}
+
+.window_title {
+  display: flex;
+  align-items: center;
+  justify-content: start;
+  flex-direction: row;
+  gap: unit(0.5);
+  padding: unit(0.2) unit(1);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  border-bottom: rpx(1) solid $gray-xx;
+  background-color: white;
+}
+
+.window.is_active .window_title {
+  background-color: $accent;
+  color: white;
+}

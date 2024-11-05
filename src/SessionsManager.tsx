@@ -1,8 +1,10 @@
 import { DEFAULT_COOKIE_STORE_ID, SESSION_KEY } from './constants'
 import { createSortHandler } from './createSortHandler'
 import { OutgoingMessageDescriptor, SavedSessionsDescriptor, SavedTabDescriptor, SessionsDescriptor, TabDescriptor, WindowDescriptor } from './types'
+import { defineAll } from './utils/defineAll'
 import { isNil } from './utils/isNil'
 import { isNotNil } from './utils/isNotNil'
+import { remapObject } from './utils/remapObject'
 import { serialize } from './utils/serialize'
 
 export class SessionsManager {
@@ -56,6 +58,31 @@ export class SessionsManager {
     }
 
     this.sortTabs()
+  }
+
+  async openStoredSession(id: string) {
+    if (this.data.windows.find(w => w.session_id === id)) {
+      this.logger?.info(`[tabsaver] [background] Session ${id} is already opened`)
+      return
+    }
+    const window = this.storedData.windows.find(w => w.session_id === id)
+    if (!window) return
+    const tabs = this.storedData.tabs.filter(t => t.window_session_id === id)
+    const cwindow = await this.br.windows.create()
+    if (!cwindow.id) throw new Error('Window id is not defined')
+    await this.setWindowSession(cwindow.id, id)
+    let wtab = cwindow.tabs?.at(0) ?? null
+    for (const tab of tabs) {
+      await this.br.tabs.create({
+        ...this.convertStoredTabToTabCreateProperties(tab),
+        windowId: cwindow.id,
+      })
+      if (wtab?.id) {
+        await this.br.tabs.remove(wtab.id)
+        wtab = null
+      }
+    }
+    await this.triggerUpdate()
   }
 
   tabCreatedHandler = async (tab: browser.tabs.Tab) => {
@@ -218,13 +245,13 @@ export class SessionsManager {
 
   private async serializeWindow(window: browser.windows.Window): Promise<WindowDescriptor | null> {
     if (!window.id) return null
-    const session_id = asString(await this.br.sessions.getWindowValue(window.id, SESSION_KEY))
-    return {
+    const session_id = (await this.getWindowSession(window.id)) ?? undefined
+    return defineAll<WindowDescriptor>({
       id: window.id,
       session_id,
       focused: window.focused || undefined,
       incognito: window.incognito || undefined,
-    }
+    })
   }
 
   private wrapWithQueue<T extends (...args: any[]) => any>(fn: T): T {
@@ -237,7 +264,7 @@ export class SessionsManager {
 
   async convertTabToStoredTab(tab: TabDescriptor): Promise<SavedTabDescriptor | null> {
     if (isNil(tab.id) || isNil(tab.window_id) || !tab.url) return null
-    const sessionId = asString(await this.br.sessions.getWindowValue(tab.window_id, SESSION_KEY))
+    const sessionId = this.getWindowSession(tab.window_id)
     if (!sessionId) return null
     return serialize({
       // TODO: better approach to generate stable id
@@ -249,6 +276,27 @@ export class SessionsManager {
       favicon_url: tab.favicon_url,
       title: tab.title,
     })
+  }
+
+  convertStoredTabToTabCreateProperties(tab: SavedTabDescriptor): browser.tabs._CreateCreateProperties {
+    return remapObject<SavedTabDescriptor, browser.tabs._CreateCreateProperties>(tab, {
+      id: () => ({}),
+      url: url => ({ url }),
+      title: () => ({}),
+      window_session_id: () => ({}),
+      index: index => ({ index }),
+      cookie_store_id: cookieStoreId => ({ cookieStoreId }),
+      favicon_url: () => ({}),
+    })
+  }
+
+  async getWindowSession(windowId?: number): Promise<string | null> {
+    if (!windowId) return null
+    return asString(await this.br.sessions.getWindowValue(windowId, SESSION_KEY)) ?? null
+  }
+
+  async setWindowSession(windowId: number, id: string): Promise<void> {
+    return await this.br.sessions.setWindowValue(windowId, SESSION_KEY, id)
   }
 }
 
