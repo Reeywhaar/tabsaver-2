@@ -60,3 +60,7 @@ export type IncomingMessageDescriptor =
       type: 'openSession'
       id: string
     }
+  | {
+      type: 'unlinkStored'
+      sessionId: string
+    }

@@ -11,6 +11,7 @@ import { Icon } from '../Icon/Icon'
 import { Spacer } from '../Spacer/Spacer'
 
 import classes from './Window.module.scss'
+import { sendRuntimeMessage } from '@app/utils/sendRuntimeMessage'
 
 export const Window: FunctionComponent<{ window: WindowDescriptor; index: number }> = ({ window, index }) => {
   const browser = useBrowser()
@@ -24,6 +25,17 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   })
 
   const closeHandler = useClickHandler(async () => {
+    await browser.windows.remove(window.id)
+  })
+
+  const unlinkStoredHandler = useClickHandler(async () => {
+    const sid = window.session_id
+    if (!sid) throw new Error('No session id')
+
+    sendRuntimeMessage(browser, {
+      type: 'unlinkStored',
+      sessionId: sid,
+    })
     await browser.windows.remove(window.id)
   })
 
@@ -79,6 +91,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
       <div className={classes.window_title} ref={titleRef} {...activateHandler}>
         <div>{label}</div>
         <Spacer />
+        {storedSession && <Icon name="minus" {...unlinkStoredHandler} />}
         <Icon name="close" {...closeHandler} />
       </div>
       <div>

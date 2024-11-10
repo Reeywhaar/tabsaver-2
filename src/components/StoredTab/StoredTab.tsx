@@ -1,11 +1,12 @@
 import React, { FunctionComponent } from 'react'
 import { SavedTabDescriptor, SavedWindowDescriptor } from '@app/types'
 
-import tabClasses from '../Tab/Tab.module.scss'
 import { Spacer } from '../Spacer/Spacer'
 import { Icon } from '../Icon/Icon'
 import { useDataUpdate } from '../DataProvider'
 import { useClickHandler } from '@app/hooks/useClickHandler'
+
+import tabClasses from '../Tab/Tab.module.scss'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -23,7 +24,9 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab, window }) =>
 
   return (
     <div className={tabClasses.tab}>
-      <div className={tabClasses.tab_label}>{tab.title ?? tab.id}</div>
+      <div className={tabClasses.tab_label}>
+        {tab.title ?? tab.id} <span className={tabClasses.tab_url}>{tab.url}</span>
+      </div>
       <Spacer />
       <Icon name="close" {...removeHandler} />
     </div>

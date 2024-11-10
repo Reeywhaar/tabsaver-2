@@ -61,7 +61,6 @@ export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof brow
   )
 
   useEffect(() => {
-    sendRuntimeMessage(br, { type: 'getData' })
     const handler = (message: OutgoingMessageDescriptor) => {
       console.info('[tabsaver] [App] Incoming message', message)
       switch (message.type) {
@@ -75,6 +74,8 @@ export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof brow
     }
 
     browser.runtime.onMessage.addListener(handler)
+
+    sendRuntimeMessage(br, { type: 'getData' })
 
     return () => {
       browser.runtime.onMessage.removeListener(handler)

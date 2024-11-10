@@ -42,8 +42,8 @@ export class SessionsManager {
 
   async getInitialData() {
     const windows = await this.br.windows.getAll({ populate: true })
-    this.data.windows.length = 0
-    this.data.tabs.length = 0
+    this.data.windows = []
+    this.data.tabs = []
 
     this.logger?.info('[tabsaver] [background] initial windows', windows)
     for (const window of windows) {
@@ -82,6 +82,12 @@ export class SessionsManager {
         wtab = null
       }
     }
+    await this.triggerUpdate()
+  }
+
+  async unlinkStoredSession(sessionId: string) {
+    this.storedData.tabs = this.storedData.tabs.filter(t => t.window_session_id !== sessionId)
+    this.storedData.windows = this.storedData.windows.filter(w => w.session_id !== sessionId)
     await this.triggerUpdate()
   }
 
@@ -296,7 +302,8 @@ export class SessionsManager {
   }
 
   async setWindowSession(windowId: number, id: string): Promise<void> {
-    return await this.br.sessions.setWindowValue(windowId, SESSION_KEY, id)
+    await this.br.sessions.setWindowValue(windowId, SESSION_KEY, id)
+    this.data.windows.map(w => (w.id === windowId ? { ...w, session_id: id } : w))
   }
 }
 

@@ -2,6 +2,7 @@ import React, { FunctionComponent, useCallback } from 'react'
 
 import button from '@app/styles/button.module.scss'
 import classes from './Diagnostics.module.scss'
+import classNames from 'classnames'
 
 export const Diagnostics: FunctionComponent = () => {
   const openDevtools = useCallback(() => {
@@ -22,23 +23,26 @@ export const Diagnostics: FunctionComponent = () => {
     })
   }, [])
 
+  const reload = useCallback(() => {
+    browser.runtime.reload()
+  }, [])
+
+  const renderButton = (label: string, action: () => void) => {
+    return (
+      <div>
+        <button className={classNames(button.button, classes.button)} onClick={action}>
+          {label}
+        </button>
+      </div>
+    )
+  }
+
   return (
     <div className={classes.diag_buttons}>
-      <div>
-        <button className={button.button} onClick={openDevtools}>
-          Open devtools
-        </button>
-      </div>
-      <div>
-        <button className={button.button} onClick={openDiagnostics}>
-          Open diagnostics
-        </button>
-      </div>
-      <div>
-        <button className={button.button} onClick={openPanel}>
-          Open panel
-        </button>
-      </div>
+      {renderButton('Reload', reload)}
+      {renderButton('Open devtools', openDevtools)}
+      {renderButton('Open diagnostics', openDiagnostics)}
+      {renderButton('Open panel', openPanel)}
     </div>
   )
 }
