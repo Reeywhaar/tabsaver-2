@@ -264,9 +264,9 @@ export class SessionsManager {
 
   async convertTabToStoredTab(tab: TabDescriptor): Promise<SavedTabDescriptor | null> {
     if (isNil(tab.id) || isNil(tab.window_id) || !tab.url) return null
-    const sessionId = this.getWindowSession(tab.window_id)
+    const sessionId = await this.getWindowSession(tab.window_id)
     if (!sessionId) return null
-    return serialize({
+    return serialize<SavedTabDescriptor>({
       // TODO: better approach to generate stable id
       id: `${sessionId}.${tab.id}`,
       index: tab.index,
