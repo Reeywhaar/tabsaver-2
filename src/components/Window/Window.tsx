@@ -28,6 +28,13 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
     await browser.windows.remove(window.id)
   })
 
+  const linkWindowHandler = useClickHandler(async () => {
+    sendRuntimeMessage(browser, {
+      type: 'linkWindow',
+      windowId: window.id,
+    })
+  })
+
   const unlinkStoredHandler = useClickHandler(async () => {
     const sid = window.session_id
     if (!sid) throw new Error('No session id')
@@ -36,7 +43,6 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
       type: 'unlinkStored',
       sessionId: sid,
     })
-    await browser.windows.remove(window.id)
   })
 
   useEffect(() => {
@@ -91,7 +97,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
       <div className={classes.window_title} ref={titleRef} {...activateHandler}>
         <div>{label}</div>
         <Spacer />
-        {storedSession && <Icon name="minus" {...unlinkStoredHandler} />}
+        {storedSession ? <Icon name="minus" {...unlinkStoredHandler} /> : <Icon name="plus" {...linkWindowHandler} />}
         <Icon name="close" {...closeHandler} />
       </div>
       <div>

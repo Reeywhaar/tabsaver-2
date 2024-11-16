@@ -1,3 +1,5 @@
+import * as RT from '@badrap/valita'
+
 export type TabDescriptor = {
   id: number
   url: string
@@ -22,20 +24,31 @@ export type SessionsDescriptor = {
   tabs: TabDescriptor[]
 }
 
-export type SavedTabDescriptor = {
-  id: string
-  url: string
-  title?: string
-  window_session_id: string
-  index: number
-  cookie_store_id?: string
-  favicon_url?: string
-}
+export const RT_SavedTabDescriptor = RT.object({
+  id: RT.string(),
+  url: RT.string(),
+  title: RT.string().optional(),
+  window_session_id: RT.string(),
+  index: RT.number(),
+  cookie_store_id: RT.string().optional(),
+  favicon_url: RT.string().optional(),
+})
 
-export type SavedWindowDescriptor = {
-  session_id: string
-  title: string
-}
+export type SavedTabDescriptor = RT.Infer<typeof RT_SavedTabDescriptor>
+
+export const RT_SavedWindowDescriptor = RT.object({
+  session_id: RT.string(),
+  title: RT.string(),
+  position: RT.object({ left: RT.number(), top: RT.number() }).optional(),
+  size: RT.object({ width: RT.number(), height: RT.number() }).optional(),
+})
+
+export type SavedWindowDescriptor = RT.Infer<typeof RT_SavedWindowDescriptor>
+
+export const RT_SavedSessionsDescriptor = RT.object({
+  windows: RT.array(RT_SavedWindowDescriptor),
+  tabs: RT.array(RT_SavedTabDescriptor),
+})
 
 export type SavedSessionsDescriptor = {
   windows: SavedWindowDescriptor[]
@@ -59,6 +72,10 @@ export type IncomingMessageDescriptor =
   | {
       type: 'openSession'
       id: string
+    }
+  | {
+      type: 'linkWindow'
+      windowId: number
     }
   | {
       type: 'unlinkStored'

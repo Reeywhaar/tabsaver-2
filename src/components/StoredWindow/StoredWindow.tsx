@@ -3,11 +3,14 @@ import { SavedWindowDescriptor } from '@app/types'
 import { useBrowser, useDataUpdate, useStoredSessions } from '../DataProvider'
 import { StoredTab } from '../StoredTab/StoredTab'
 
-import windowClasses from '../Window/Window.module.scss'
 import { Icon } from '../Icon/Icon'
 import { Spacer } from '../Spacer/Spacer'
 import { useClickHandler } from '@app/hooks/useClickHandler'
 import { sendRuntimeMessage } from '@app/utils/sendRuntimeMessage'
+
+import windowClasses from '../Window/Window.module.scss'
+import classes from './StoredWindow.module.scss'
+import classNames from 'classnames'
 
 export type StoredWindowProps = {
   window: SavedWindowDescriptor
@@ -20,8 +23,9 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
 
   const windowTabs = useMemo(() => tabs.filter(t => t.window_session_id === window.session_id), [tabs, window.session_id])
 
-  const removeHandler = useClickHandler(e => {
+  const removeHandler = useClickHandler(async e => {
     e.preventDefault()
+
     updateStoredSessions(stored => ({
       ...stored,
       windows: stored.windows.filter(w => w.session_id !== window.session_id),
@@ -38,7 +42,7 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
   })
 
   return (
-    <div className={windowClasses.window}>
+    <div className={classNames(windowClasses.window, classes.window)}>
       <div className={windowClasses.window_title}>
         <div>{window.title}</div>
         <Spacer />

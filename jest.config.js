@@ -8,6 +8,7 @@ module.exports = {
   transform: {
     '^.+\\.(j|t)s(x?)$': ['@swc/jest', { jsc: { parser: { syntax: 'typescript', decorators: true } } }],
   },
+  testEnvironment: 'jsdom',
   transformIgnorePatterns: [`/node_modules/(?!(${EXCLUDES_LIST.join('|')})/)`],
   testMatch: null,
   testRegex: '(\\.|/)(test|spec)\\.(j|t)s(x?)$',

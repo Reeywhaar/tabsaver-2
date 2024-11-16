@@ -38,6 +38,10 @@ async function main() {
         await manager.openStoredSession(message.id)
         return
       }
+      case 'linkWindow': {
+        await manager.linkWindow(message.windowId)
+        return
+      }
       case 'unlinkStored': {
         await manager.unlinkStoredSession(message.sessionId)
         return

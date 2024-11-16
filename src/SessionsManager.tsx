@@ -1,11 +1,22 @@
+import { v4 } from 'uuid'
 import { DEFAULT_COOKIE_STORE_ID, SESSION_KEY } from './constants'
 import { createSortHandler } from './createSortHandler'
-import { OutgoingMessageDescriptor, SavedSessionsDescriptor, SavedTabDescriptor, SessionsDescriptor, TabDescriptor, WindowDescriptor } from './types'
+import {
+  OutgoingMessageDescriptor,
+  SavedSessionsDescriptor,
+  SavedTabDescriptor,
+  SavedWindowDescriptor,
+  SessionsDescriptor,
+  TabDescriptor,
+  WindowDescriptor,
+} from './types'
 import { defineAll } from './utils/defineAll'
 import { isNil } from './utils/isNil'
 import { isNotNil } from './utils/isNotNil'
 import { remapObject } from './utils/remapObject'
 import { serialize } from './utils/serialize'
+import { promiseIntoResult } from './utils/intoResult'
+import { asResultOk } from './utils/Result'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -45,6 +56,8 @@ export class SessionsManager {
     this.data.windows = []
     this.data.tabs = []
 
+    this.storedData = (await this.getStoredData()) ?? this.storedData
+
     this.logger?.info('[tabsaver] [background] initial windows', windows)
     for (const window of windows) {
       if (!window.id) return
@@ -66,7 +79,7 @@ export class SessionsManager {
       return
     }
     const window = this.storedData.windows.find(w => w.session_id === id)
-    if (!window) return
+    if (!window) throw new Error(`Session ${id} not found`)
     const tabs = this.storedData.tabs.filter(t => t.window_session_id === id)
     const cwindow = await this.br.windows.create()
     if (!cwindow.id) throw new Error('Window id is not defined')
@@ -85,7 +98,35 @@ export class SessionsManager {
     await this.triggerUpdate()
   }
 
+  async linkWindow(windowId: number) {
+    const window = await this.br.windows.get(windowId)
+    if (!window.id) return
+    const tabs = await this.br.tabs.query({ windowId: window.id })
+    const date = new Date()
+    const swindow: SavedWindowDescriptor = {
+      session_id: v4(),
+      title: `New session at ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
+      position: window.left && window.top ? { left: window.left, top: window.top } : undefined,
+      size: window.width && window.height ? { width: window.width, height: window.height } : undefined,
+    }
+    const stabs = (
+      await Promise.all(
+        tabs.map(t => {
+          const stab = serializeTab(t)
+          if (!stab) return null
+          return this.convertTabToStoredTab(stab)
+        })
+      )
+    ).filter(isNotNil)
+    this.storedData.windows.push(swindow)
+    this.storedData.tabs.push(...stabs)
+    await this.setWindowSession(window.id, swindow.session_id)
+    this.sortTabs()
+    await this.triggerUpdate()
+  }
+
   async unlinkStoredSession(sessionId: string) {
+    this.data.windows = this.data.windows.map(w => (w.session_id === sessionId ? { ...w, session_id: undefined } : w))
     this.storedData.tabs = this.storedData.tabs.filter(t => t.window_session_id !== sessionId)
     this.storedData.windows = this.storedData.windows.filter(w => w.session_id !== sessionId)
     await this.triggerUpdate()
@@ -185,15 +226,20 @@ export class SessionsManager {
   }
 
   tabRemovedHandler = async (tabId: number, info: browser.tabs._OnRemovedRemoveInfo) => {
-    this.logger?.info('[tabsaver] [background] Tab removed', tabId)
-    const tabIndex = this.data.tabs.findIndex(t => t.id === tabId)
-    if (tabIndex === -1) return
-    let index = 0
-    this.data.tabs.splice(tabIndex, 1)
-    this.data.tabs = this.data.tabs.map(t => {
-      if (t.window_id !== info.windowId) return t
-      return { ...t, index: index++ }
-    })
+    if (info.isWindowClosing) {
+      this.data.tabs = this.data.tabs.filter(t => t.window_id !== info.windowId)
+      this.data.windows = this.data.windows.filter(w => w.id !== info.windowId)
+    } else {
+      this.logger?.info('[tabsaver] [background] Tab removed', tabId)
+      const tabIndex = this.data.tabs.findIndex(t => t.id === tabId)
+      if (tabIndex === -1) return
+      let index = 0
+      this.data.tabs.splice(tabIndex, 1)
+      this.data.tabs = this.data.tabs.map(t => {
+        if (t.window_id !== info.windowId) return t
+        return { ...t, index: index++ }
+      })
+    }
     this.sortTabs()
     await this.triggerUpdate()
   }
@@ -242,7 +288,9 @@ export class SessionsManager {
     const tabsToStore = this.data.tabs.filter(t => isNotNil(t.window_id) && storedWindowsIds.includes(t.window_id))
     const newStoredTabs = (await Promise.all(tabsToStore.map(t => this.convertTabToStoredTab(t)))).filter(isNotNil)
     const storedTabs = [...this.storedData.tabs.filter(t => inactiveStoredWindowsIds.includes(t.window_session_id))]
+
     this.storedData.tabs = sortStoredTabs([...storedTabs, ...newStoredTabs])
+    this.setStoredData(this.storedData)
   }
 
   sendMessage(message: OutgoingMessageDescriptor) {
@@ -297,13 +345,29 @@ export class SessionsManager {
   }
 
   async getWindowSession(windowId?: number): Promise<string | null> {
-    if (!windowId) return null
+    if (isNil(windowId)) return null
     return asString(await this.br.sessions.getWindowValue(windowId, SESSION_KEY)) ?? null
   }
 
   async setWindowSession(windowId: number, id: string): Promise<void> {
     await this.br.sessions.setWindowValue(windowId, SESSION_KEY, id)
-    this.data.windows.map(w => (w.id === windowId ? { ...w, session_id: id } : w))
+    this.data.windows = this.data.windows.map(w => (w.id === windowId ? { ...w, session_id: id } : w))
+  }
+  async unsetWindowSession(windowId: number): Promise<void> {
+    await this.br.sessions.removeWindowValue(windowId, SESSION_KEY)
+    this.data.windows = this.data.windows.map(w => (w.id === windowId ? { ...w, session_id: undefined } : w))
+  }
+
+  async getStoredData() {
+    return asResultOk(await promiseIntoResult(this.br.storage.local.get('storedData')))?.storedData
+  }
+
+  async setStoredData(data: SavedSessionsDescriptor) {
+    try {
+      await this.br.storage.local.set({ storedData: data })
+    } catch (e) {
+      // todo: handle error
+    }
   }
 }
 

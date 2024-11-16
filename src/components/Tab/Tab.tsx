@@ -136,7 +136,7 @@ const getTabData = (tab: TabDescriptor): string => {
 }
 
 const excludedURLS = ['about:newtab', 'about:home', 'about:blank']
-const isFaviconIncluded = (url?: string): url is string => {
+export const isFaviconIncluded = (url?: string): url is string => {
   if (!url) return false
   if (url.startsWith('chrome://')) return false
   return true

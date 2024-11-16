@@ -33,6 +33,7 @@
     "@babel/eslint-parser": "^7.24.7",
     "@reeywhaar/svgmaker": "^0.4.0",
     "@swc/jest": "^0.2.36",
+    "@testing-library/react": "^16.0.1",
     "@types/firefox-webext-browser": "^120.0.4",
     "@types/jest": "^29.5.12",
     "@types/react": "^18.3.3",
@@ -70,6 +71,8 @@
     "webpack-cli": "^5.1.4"
   },
   "dependencies": {
-    "classnames": "^2.5.1"
+    "@badrap/valita": "^0.3.11",
+    "classnames": "^2.5.1",
+    "jest-environment-jsdom": "^29.7.0"
   }
 }

@@ -27,21 +27,39 @@ const Diagnostics: FunctionComponent = () => {
       windows: [
         {
           title: 'Saved window',
-          session_id: '123',
+          session_id: 'savedwindow',
+        },
+        {
+          title: 'Another saved window',
+          session_id: 'anothersavedwindow',
         },
       ],
       tabs: [
         {
-          id: '123',
+          id: 'savedwindow:1',
           index: 0,
-          window_session_id: '123',
+          window_session_id: 'savedwindow',
           url: 'https://example.com',
           title: 'Example',
         },
         {
-          id: '535',
+          id: 'savedwindow:2',
           index: 1,
-          window_session_id: '123',
+          window_session_id: 'savedwindow',
+          url: 'https://vyrtsev.com',
+          title: 'Vyrtsev',
+        },
+        {
+          id: 'anothersavedwindow:1',
+          index: 0,
+          window_session_id: 'anothersavedwindow',
+          url: 'https://ya.ru',
+          title: 'Yandex',
+        },
+        {
+          id: 'anothersavedwindow:2',
+          index: 1,
+          window_session_id: 'anothersavedwindow',
           url: 'https://vyrtsev.com',
           title: 'Vyrtsev',
         },

@@ -7,13 +7,14 @@ import { useDataUpdate } from '../DataProvider'
 import { useClickHandler } from '@app/hooks/useClickHandler'
 
 import tabClasses from '../Tab/Tab.module.scss'
+import { isFaviconIncluded } from '../Tab/Tab'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
   window: SavedWindowDescriptor
 }
 
-export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab, window }) => {
+export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
   const { updateStoredSessions } = useDataUpdate()
 
   const removeHandler = useClickHandler(e => {
@@ -24,6 +25,7 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab, window }) =>
 
   return (
     <div className={tabClasses.tab}>
+      {isFaviconIncluded(tab.favicon_url) && <img alt="" className={tabClasses.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />}
       <div className={tabClasses.tab_label}>
         {tab.title ?? tab.id} <span className={tabClasses.tab_url}>{tab.url}</span>
       </div>

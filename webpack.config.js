@@ -80,6 +80,7 @@ module.exports = (_h, args) => {
         // new webpack.IgnorePlugin({ resourceRegExp: /\.woff/i }),
         new webpack.DefinePlugin({
           'process.env.NODE_ENV': JSON.stringify(args.mode ?? 'production'),
+          'process.env.ENABLE_DIAGNOSTICS': process.env.ENABLE_DIAGNOSTICS === 'true' ? 'true' : undefined,
           __VUE_OPTIONS_API__: true,
           __VUE_PROD_DEVTOOLS__: false,
         }),

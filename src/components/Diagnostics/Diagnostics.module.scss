@@ -3,10 +3,8 @@
 .diag_buttons {
   display: flex;
   flex-direction: row;
-  justify-content: center;
+  justify-content: flex-start;
   gap: unit(0.5);
-  padding: unit(0.5);
-  border-top: 1px dashed $gray_xx;
 }
 
 .button {
