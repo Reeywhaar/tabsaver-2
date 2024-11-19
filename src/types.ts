@@ -38,6 +38,7 @@ export type SavedTabDescriptor = RT.Infer<typeof RT_SavedTabDescriptor>
 
 export const RT_SavedWindowDescriptor = RT.object({
   session_id: RT.string(),
+  associated_window_id: RT.number().optional(),
   title: RT.string(),
   position: RT.object({ left: RT.number(), top: RT.number() }).optional(),
   size: RT.object({ width: RT.number(), height: RT.number() }).optional(),

@@ -95,6 +95,7 @@ export class SessionsManager {
         wtab = null
       }
     }
+    this.storedData.windows = this.storedData.windows.map(w => (w.session_id === id ? { ...w, associated_window_id: cwindow.id } : w))
     await this.triggerUpdate()
   }
 
@@ -105,6 +106,7 @@ export class SessionsManager {
     const date = new Date()
     const swindow: SavedWindowDescriptor = {
       session_id: v4(),
+      associated_window_id: window.id,
       title: `New session at ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
       position: window.left && window.top ? { left: window.left, top: window.top } : undefined,
       size: window.width && window.height ? { width: window.width, height: window.height } : undefined,

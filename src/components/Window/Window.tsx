@@ -90,7 +90,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   }, [browser, window.id])
 
   const windowTabs = tabs.filter(tab => tab.window_id === window.id)
-  const storedSession = (window.session_id && storedWindows.find(w => w.session_id === window.session_id)) || null
+  const storedSession = (window.session_id && storedWindows.find(w => w.session_id === window.session_id && w.associated_window_id === window.id)) || null
   const label: ReactNode = storedSession ? storedSession.title : `Window ${index + 1}`
   return (
     <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id}>
