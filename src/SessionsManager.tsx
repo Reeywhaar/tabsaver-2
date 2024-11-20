@@ -13,10 +13,10 @@ import {
 import { defineAll } from './utils/defineAll'
 import { isNil } from './utils/isNil'
 import { isNotNil } from './utils/isNotNil'
-import { remapObject } from './utils/remapObject'
-import { serialize } from './utils/serialize'
 import { promiseIntoResult } from './utils/intoResult'
 import { asResultOk } from './utils/Result'
+import { convertStoredTabToTabCreateProperties } from './utils/convertStoredTabToTabCreateProperties'
+import { convertTabToStoredTab } from './utils/convertTabToStoredTab'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -87,7 +87,7 @@ export class SessionsManager {
     let wtab = cwindow.tabs?.at(0) ?? null
     for (const tab of tabs) {
       await this.br.tabs.create({
-        ...this.convertStoredTabToTabCreateProperties(tab),
+        ...convertStoredTabToTabCreateProperties(tab),
         windowId: cwindow.id,
       })
       if (wtab?.id) {
@@ -322,28 +322,7 @@ export class SessionsManager {
     if (isNil(tab.id) || isNil(tab.window_id) || !tab.url) return null
     const sessionId = await this.getWindowSession(tab.window_id)
     if (!sessionId) return null
-    return serialize<SavedTabDescriptor>({
-      // TODO: better approach to generate stable id
-      id: `${sessionId}.${tab.id}`,
-      index: tab.index,
-      url: tab.url,
-      window_session_id: sessionId,
-      cookie_store_id: tab.cookie_store_id,
-      favicon_url: tab.favicon_url,
-      title: tab.title,
-    })
-  }
-
-  convertStoredTabToTabCreateProperties(tab: SavedTabDescriptor): browser.tabs._CreateCreateProperties {
-    return remapObject<SavedTabDescriptor, browser.tabs._CreateCreateProperties>(tab, {
-      id: () => ({}),
-      url: url => ({ url }),
-      title: () => ({}),
-      window_session_id: () => ({}),
-      index: index => ({ index }),
-      cookie_store_id: cookieStoreId => ({ cookieStoreId }),
-      favicon_url: () => ({}),
-    })
+    return convertTabToStoredTab(sessionId, tab)
   }
 
   async getWindowSession(windowId?: number): Promise<string | null> {

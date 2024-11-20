@@ -2,6 +2,7 @@ import React, { FunctionComponent } from 'react'
 import { createRoot } from 'react-dom/client'
 import { DataProvider, useBrowser, useDataUpdate, useSessions, useStoredSessions } from './components/DataProvider'
 import { useEvent } from './hooks/useEvent'
+import { NotificationProvider, useNotification } from './components/Notifications/NotificationsContext'
 
 function main() {
   const root = createRoot(document.getElementsByClassName('main')[0])
@@ -11,7 +12,9 @@ function main() {
 const App: FunctionComponent = () => {
   return (
     <DataProvider br={browser}>
-      <Diagnostics />
+      <NotificationProvider>
+        <Diagnostics />
+      </NotificationProvider>
     </DataProvider>
   )
 }
@@ -21,6 +24,8 @@ const Diagnostics: FunctionComponent = () => {
   const data = useSessions()
   const storedData = useStoredSessions()
   const { updateStoredSessions } = useDataUpdate()
+
+  const notify = useNotification()
 
   const handleImport = useEvent(() => {
     updateStoredSessions(_data => ({
@@ -89,6 +94,28 @@ const Diagnostics: FunctionComponent = () => {
     })
   })
 
+  const openInfoNotification = useEvent(() => {
+    const ctx = notify(_ctx => ({
+      level: 'info',
+      description: 'This is an info notification',
+    }))
+
+    setTimeout(() => {
+      ctx.close()
+    }, 3000)
+  })
+
+  const openErrorNotification = useEvent(() => {
+    const ctx = notify(_ctx => ({
+      level: 'error',
+      description: 'This is an error notification',
+    }))
+
+    setTimeout(() => {
+      ctx.close()
+    }, 3000)
+  })
+
   return (
     <div>
       <h1>Diagnostics</h1>
@@ -102,6 +129,13 @@ const Diagnostics: FunctionComponent = () => {
         <p>Open test windows</p>
         <div>
           <button onClick={handleOpenTestWindows}>Open test windows</button>
+        </div>
+      </section>
+      <section>
+        <p>Notifications</p>
+        <div>
+          <button onClick={openInfoNotification}>Open info notification</button>
+          <button onClick={openErrorNotification}>Open Error notification</button>
         </div>
       </section>
       <section>

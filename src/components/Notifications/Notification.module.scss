@@ -1,0 +1,22 @@
+@use '@app/styles/mixins.module' as *;
+
+.notification {
+  pointer-events: all;
+  background: white;
+  padding: unit(0.5);
+  border-radius: rpx(5);
+
+  box-shadow: 0 0 rpx(2) rgba(0, 0, 0, 0.1);
+
+  border: rpx(2) solid transparent;
+}
+
+.notification.is_info {
+  border-color: $info;
+  color: $info;
+}
+
+.notification.is_error {
+  border-color: $error;
+  color: $error;
+}

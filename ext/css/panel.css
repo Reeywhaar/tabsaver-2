@@ -19,6 +19,10 @@
   --separatorLightness: 0%;
 }
 
+* {
+  box-sizing: border-box;
+}
+
 html,
 body {
   padding: 0;
@@ -33,7 +37,7 @@ body {
 
 body.popup {
   width: 25em;
-  min-height: 5em;
+  min-height: 3em;
 }
 
 button {
@@ -118,7 +122,10 @@ button {
   border-radius: 50%;
   display: inline-block;
   border: 1px solid transparent;
-  transition: width 0.2s, border-width 0.2s, margin-right 0.2s;
+  transition:
+    width 0.2s,
+    border-width 0.2s,
+    margin-right 0.2s;
   transition-delay: 0.2s;
 }
 
@@ -215,11 +222,11 @@ body.sidebar .main {
   background-color: var(--transparent-overlay-color);
 }
 
-.toggle-button[data-state="off"] {
+.toggle-button[data-state='off'] {
   opacity: 0.8;
 }
 
-.toggle-button[data-state="on"] {
+.toggle-button[data-state='on'] {
   background-color: var(--hover-color);
 }
 
@@ -309,17 +316,17 @@ body.sidebar .main {
 }
 
 .tabset__link[data-identity-name]:before {
-  content: attr(data-identity-name) "";
+  content: attr(data-identity-name) '';
   padding: 0.1em 0.3em;
   border-radius: 2px;
   margin-right: 0.1em;
   font-size: 85%;
-  background-color: var(--color, "grey");
+  background-color: var(--color, 'grey');
   color: #fff;
   font-weight: normal;
 }
 
-.tabset__link[data-identity-color="yellow"]:before {
+.tabset__link[data-identity-color='yellow']:before {
   color: #777;
 }
 
@@ -328,7 +335,7 @@ body.sidebar .main {
   line-height: 1em;
 }
 
-.tabset__title[contenteditable="true"] {
+.tabset__title[contenteditable='true'] {
   font-weight: bold;
 }
 
@@ -384,7 +391,7 @@ body.sidebar .main {
 }
 
 .tabsets:empty::after {
-  content: "No TabSets";
+  content: 'No TabSets';
   display: block;
   text-align: center;
   font-size: 110%;
@@ -410,7 +417,8 @@ body.sidebar .main {
 }
 
 .tabsets__separator {
-  box-shadow: 0px 0.5px 0px 0.5px hsla(0, 0%, var(--separatorLightness), 0.25),
+  box-shadow:
+    0px 0.5px 0px 0.5px hsla(0, 0%, var(--separatorLightness), 0.25),
     0px 1px 0px 0.5px hsla(0, 0%, var(--separatorLightness), 0.12),
     0px 1.5px 0px 0.5px hsla(0, 0%, var(--separatorLightness), 0.17),
     0px 2px 0px 0.5px hsla(0, 0%, var(--separatorLightness), 0.12),
@@ -464,7 +472,7 @@ body.sidebar .main {
   opacity: 0.6 !important;
 }
 
-.prefs__pinned-button[data-state="on"] {
+.prefs__pinned-button[data-state='on'] {
   color: var(--hover-color);
   background: none;
   opacity: 1 !important;

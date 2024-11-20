@@ -1,0 +1,28 @@
+@use '@app/styles/mixins.module' as *;
+
+.overlay {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  pointer-events: none;
+}
+
+.content {
+  pointer-events: all;
+  padding: unit(1);
+  background: white;
+  border-radius: rpx(5);
+
+  display: flex;
+  flex-direction: column;
+  gap: unit(1);
+}
+
+.buttons {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: unit(0.5);
+}

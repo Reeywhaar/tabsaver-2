@@ -5,6 +5,10 @@ $gray: #777;
 $gray_xx: #ddd;
 $gray_xxx: #eee;
 $accent: #ecb80d;
+$accent_tab: #f9f2dd;
+$accent_tab_window: #f6e8bc;
+$error: #bb3611;
+$info: rgb(29, 113, 182);
 
 // Converts px to em with 14px base
 @function rpx($n, $base: 16) {

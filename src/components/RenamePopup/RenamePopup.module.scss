@@ -1,0 +1,13 @@
+@use '@app/styles/mixins.module' as *;
+
+.content {
+  margin: unit(0.5);
+  padding: unit(0.5);
+
+  background: white;
+  border-radius: rpx(5);
+}
+
+.input {
+  width: 100%;
+}

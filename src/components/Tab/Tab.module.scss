@@ -18,8 +18,12 @@
   flex: 0 1 auto;
 }
 
+.tab.is_active {
+  background-color: $accent_tab;
+}
+
 .tab.is_window_active.is_active {
-  background-color: $gray_xxx;
+  background-color: $accent_tab_window;
 }
 
 .tab.is_dragover_top {
@@ -43,4 +47,13 @@
 .tab_url {
   opacity: 0.8;
   font-style: italic;
+}
+
+.tab_separator {
+  opacity: 0.4;
+}
+
+.tab_icon {
+  opacity: 0.6;
+  font-size: 90% !important;
 }
