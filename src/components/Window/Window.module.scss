@@ -15,7 +15,7 @@
   pointer-events: none;
 }
 
-.window_title {
+.window_top {
   display: flex;
   align-items: center;
   justify-content: start;
@@ -29,7 +29,14 @@
   background-color: white;
 }
 
-.window.is_active .window_title {
+.window_title {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  flex: 0 1 auto;
+}
+
+.window.is_active .window_top {
   background-color: $accent;
   color: white;
 }

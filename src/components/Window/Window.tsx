@@ -150,8 +150,8 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   const label: ReactNode = storedSession ? storedSession.title : `Window ${index + 1}`
   return (
     <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id}>
-      <div className={classes.window_title} ref={titleRef} {...activateHandler}>
-        <div>{label}</div>
+      <div className={classes.window_top} ref={titleRef} {...activateHandler}>
+        <div className={classes.window_title}>{label}</div>
         <Spacer />
         {storedSession && <Icon className={classes.icon} name="edit" {...renameHandler} />}
         {storedSession ? (
