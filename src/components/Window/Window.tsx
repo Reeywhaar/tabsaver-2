@@ -16,6 +16,8 @@ import { assertNever } from '@app/utils/assertNever'
 import { convertStoredTabToTabCreateProperties } from '@app/utils/convertStoredTabToTabCreateProperties'
 import { useEvent } from '@app/hooks/useEvent'
 import { useWithErrorHandling } from '@app/hooks/useShowError'
+import { usePush } from '../Popup/PopupContext'
+import { RenamePopup } from '../RenamePopup/RenamePopup'
 
 export const Window: FunctionComponent<{ window: WindowDescriptor; index: number }> = ({ window, index }) => {
   const browser = useBrowser()
@@ -25,8 +27,29 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   const { windows: sessions, tabs: storedTabs } = useStoredSessions()
   const { updateStoredSessions } = useDataUpdate()
   const withErrorHandling = useWithErrorHandling()
+  const push = usePush()
+
+  const windowTabs = tabs.filter(tab => tab.window_id === window.id)
+  const storedSession = (window.associated_window_id && sessions.find(w => w.associated_window_id === window.associated_window_id)) || null
 
   const getStoredTabs = useEvent(() => storedTabs)
+
+  const rename = useEvent(() => {
+    if (!storedSession) return
+    push(ctx => (
+      <RenamePopup
+        ctx={ctx}
+        onUpdate={value => {
+          updateStoredSessions(stored => ({
+            ...stored,
+            windows: stored.windows.map(w => (w.session_id === storedSession.session_id ? { ...w, title: value } : w)),
+          }))
+          ctx.close()
+        }}
+        value={storedSession.title}
+      />
+    ))
+  })
 
   const activateHandler = useClickHandler(async () => {
     await browser.windows.update(window.id, { focused: true })
@@ -34,6 +57,11 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
 
   const closeHandler = useClickHandler(async () => {
     await browser.windows.remove(window.id)
+  })
+
+  const renameHandler = useClickHandler(e => {
+    e.preventDefault()
+    rename()
   })
 
   const linkWindowHandler = useClickHandler(async () => {
@@ -119,14 +147,13 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
     }
   }, [browser, getStoredTabs, updateStoredSessions, window.id, withErrorHandling])
 
-  const windowTabs = tabs.filter(tab => tab.window_id === window.id)
-  const storedSession = (window.associated_window_id && sessions.find(w => w.associated_window_id === window.associated_window_id)) || null
   const label: ReactNode = storedSession ? storedSession.title : `Window ${index + 1}`
   return (
     <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id}>
       <div className={classes.window_title} ref={titleRef} {...activateHandler}>
         <div>{label}</div>
         <Spacer />
+        {storedSession && <Icon className={classes.icon} name="edit" {...renameHandler} />}
         {storedSession ? (
           <Icon className={classes.icon} name="minus" {...unlinkStoredHandler} />
         ) : (

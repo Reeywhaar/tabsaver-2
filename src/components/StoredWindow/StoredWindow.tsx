@@ -177,9 +177,10 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
 
   return (
     <div className={classNames(windowClasses.window, classes.window)}>
-      <div className={windowClasses.window_title} ref={titleRef} {...renameHandler}>
+      <div className={windowClasses.window_title} ref={titleRef}>
         <div>{window.title}</div>
         <Spacer />
+        <Icon className={windowClasses.icon} name="edit" {...renameHandler} />
         <Icon className={windowClasses.icon} name="open" {...openHandler} />
         <Icon className={windowClasses.icon} name="close" {...removeHandler} />
       </div>

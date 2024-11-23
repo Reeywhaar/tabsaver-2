@@ -10,7 +10,8 @@ export const mappings = {
   "reload": 59654,
   "redo": 59655,
   "open": 59656,
-  "close": 59657
+  "close": 59657,
+  "edit": 59658
 }
 
 export type IconName =
@@ -23,4 +24,5 @@ export type IconName =
 "reload" |
 "redo" |
 "open" |
-"close"
+"close" |
+"edit"
