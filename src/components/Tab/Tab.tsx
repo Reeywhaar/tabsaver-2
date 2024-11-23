@@ -17,6 +17,7 @@ import { convertStoredTabToTabCreateProperties } from '@app/utils/convertStoredT
 import { isMiddleClick } from '@app/utils/isMiddleClick'
 import { useWithErrorHandling } from '@app/hooks/useShowError'
 import { isNil } from '@app/utils/isNil'
+import { TabFavicon } from '../TabFavicon/TabFavicon'
 
 export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescriptor }> = ({ tab, window }) => {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -157,11 +158,8 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
   }, [browser.tabs, getStoredTabs, getTab, updateStoredSessions, withErrorHandling])
 
   const label: ReactNode = (() => {
-    let label = `${tab.title || 'Unnamed tab'}`
-    if (tab.pinned) {
-      label = `• ${label}`
-    }
-    return label
+    if (!tab.title) return <i>Unnamed tab</i>
+    return tab.title
   })()
 
   const url = excludedURLS.includes(tab.url) ? null : tab.url
@@ -182,11 +180,8 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
       title={title}
       {...clickHandler}
     >
-      {isFaviconIncluded(tab.favicon_url) ? (
-        <img alt="" className={classes.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />
-      ) : (
-        <div className={classes.icon_placeholder} />
-      )}
+      {tab.pinned && <div className={classes.pin} />}
+      <TabFavicon url={tab.favicon_url} />
       <div className={classes.tab_label}>
         {joinNodesWithIds(
           [
@@ -218,8 +213,3 @@ const getTabData = (tab: TabDescriptor): string => {
 }
 
 const excludedURLS = ['about:newtab', 'about:home', 'about:blank']
-export const isFaviconIncluded = (url?: string): url is string => {
-  if (!url) return false
-  if (url.startsWith('chrome://')) return false
-  return true
-}

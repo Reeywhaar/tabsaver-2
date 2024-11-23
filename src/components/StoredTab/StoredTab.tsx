@@ -7,7 +7,6 @@ import { useDataUpdate } from '../DataProvider'
 import { useClickHandler } from '@app/hooks/useClickHandler'
 
 import tabClasses from '../Tab/Tab.module.scss'
-import { isFaviconIncluded } from '../Tab/Tab'
 import { DragSavedTabData } from '@app/utils/tabData'
 import { defineAll } from '@app/utils/defineAll'
 import { DRAGGABLE_SAVED_TAB_MIME } from '@app/constants'
@@ -17,6 +16,7 @@ import { ConfirmPopup } from '../ConfirmPopup/ConfirmPopup'
 import { usePush } from '../Popup/PopupContext'
 
 import classes from './StoredTab.module.scss'
+import { TabFavicon } from '../TabFavicon/TabFavicon'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -79,11 +79,8 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
 
   return (
     <div className={tabClasses.tab} draggable={true} onAuxClick={handleAuxClick} ref={rootRef}>
-      {isFaviconIncluded(tab.favicon_url) ? (
-        <img alt="" className={tabClasses.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />
-      ) : (
-        <div className={tabClasses.icon_placeholder} />
-      )}
+      {tab.pinned && <div className={tabClasses.pin} />}
+      <TabFavicon url={tab.favicon_url} />
       <div className={tabClasses.tab_label}>
         {tab.title ?? tab.id} <span className={tabClasses.tab_url}>{tab.url}</span>
       </div>

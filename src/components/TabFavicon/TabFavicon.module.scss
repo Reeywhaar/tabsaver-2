@@ -1,0 +1,14 @@
+@use '@app/styles/mixins.module' as *;
+
+.fav {
+  width: rpx(16);
+  height: rpx(16);
+  vertical-align: -2px;
+}
+
+.placeholder {
+  background: rgba(128, 128, 128, 0.2);
+  width: rpx(16);
+  height: rpx(16);
+  border-radius: rpx(5);
+}
