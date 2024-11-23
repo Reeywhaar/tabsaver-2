@@ -87,7 +87,7 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
       </div>
       <Spacer />
       <ContainerLabel id={tab.cookie_store_id} />
-      <Icon className={tabClasses.tab_icon} name="close" {...removeHandler} />
+      <Icon className={tabClasses.tab_icon} name="close" title="Remove tab from session" {...removeHandler} />
     </div>
   )
 }

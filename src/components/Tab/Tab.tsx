@@ -198,7 +198,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
       </div>
       <Spacer />
       <ContainerLabel id={tab.cookie_store_id} />
-      <Icon className={classes.tab_icon} name="close" {...removeHandler} />
+      <Icon className={classes.tab_icon} name="close" title="Close tab" {...removeHandler} />
     </div>
   )
 }

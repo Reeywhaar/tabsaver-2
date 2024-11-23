@@ -153,13 +153,13 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
       <div className={classes.window_top} ref={titleRef} {...activateHandler}>
         <div className={classes.window_title}>{label}</div>
         <Spacer />
-        {storedSession && <Icon className={classes.icon} name="edit" {...renameHandler} />}
+        {storedSession && <Icon className={classes.icon} name="edit" title="Rename" {...renameHandler} />}
         {storedSession ? (
-          <Icon className={classes.icon} name="minus" {...unlinkStoredHandler} />
+          <Icon className={classes.icon} name="minus" title="Unlink session" {...unlinkStoredHandler} />
         ) : (
-          <Icon className={classes.icon} name="plus" {...linkWindowHandler} />
+          <Icon className={classes.icon} name="plus" title="Save session" {...linkWindowHandler} />
         )}
-        <Icon className={classes.icon} name="close" {...closeHandler} />
+        <Icon className={classes.icon} name="close" title="Close window" {...closeHandler} />
       </div>
       <div>
         {windowTabs.map(tab => (
