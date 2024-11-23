@@ -6,7 +6,7 @@ export function convertStoredTabToTabCreateProperties(tab: SavedTabDescriptor): 
     id: () => ({}),
     url: url => ({ url }),
     title: () => ({}),
-    window_session_id: () => ({}),
+    session_id: () => ({}),
     index: index => ({ index }),
     cookie_store_id: cookieStoreId => ({ cookieStoreId }),
     favicon_url: () => ({}),

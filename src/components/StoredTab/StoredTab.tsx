@@ -88,7 +88,7 @@ const getTabData = (tab: SavedTabDescriptor): string => {
       type: DRAGGABLE_SAVED_TAB_MIME,
       id: tab.id,
       index: tab.index,
-      session_id: tab.window_session_id,
+      session_id: tab.session_id,
     })
   )
 }

@@ -1,5 +1,5 @@
 import { v4 } from 'uuid'
-import { DEFAULT_COOKIE_STORE_ID, SESSION_KEY } from './constants'
+import { ASSOCIATED_SESSION_KEY, DEFAULT_COOKIE_STORE_ID } from './constants'
 import { createSortHandler } from './createSortHandler'
 import {
   OutgoingMessageDescriptor,
@@ -74,16 +74,18 @@ export class SessionsManager {
   }
 
   async openStoredSession(id: string) {
-    if (this.data.windows.find(w => w.session_id === id)) {
+    const session = this.storedData.windows.find(w => w.session_id === id)
+    if (session?.associated_window_id && this.data.windows.find(w => w.associated_window_id === session?.associated_window_id)) {
       this.logger?.info(`[tabsaver] [background] Session ${id} is already opened`)
       return
     }
-    const window = this.storedData.windows.find(w => w.session_id === id)
-    if (!window) throw new Error(`Session ${id} not found`)
-    const tabs = this.storedData.tabs.filter(t => t.window_session_id === id)
+    if (!session) throw new Error(`Session ${id} not found`)
+    const tabs = this.storedData.tabs.filter(t => t.session_id === id)
     const cwindow = await this.br.windows.create()
     if (!cwindow.id) throw new Error('Window id is not defined')
-    await this.setWindowSession(cwindow.id, id)
+    const associated_id = v4()
+    await this.setWindowAssociatedWindowId(cwindow.id, associated_id)
+    this.setSessionAssociatedWindowId(session.session_id, associated_id)
     let wtab = cwindow.tabs?.at(0) ?? null
     for (const tab of tabs) {
       await this.br.tabs.create({
@@ -95,7 +97,6 @@ export class SessionsManager {
         wtab = null
       }
     }
-    this.storedData.windows = this.storedData.windows.map(w => (w.session_id === id ? { ...w, associated_window_id: cwindow.id } : w))
     await this.triggerUpdate()
   }
 
@@ -104,9 +105,10 @@ export class SessionsManager {
     if (!window.id) return
     const tabs = await this.br.tabs.query({ windowId: window.id })
     const date = new Date()
+    const associated_id = v4()
     const swindow: SavedWindowDescriptor = {
       session_id: v4(),
-      associated_window_id: window.id,
+      associated_window_id: associated_id,
       title: `New session at ${date.toLocaleDateString()} ${date.toLocaleTimeString()}`,
       position: window.left && window.top ? { left: window.left, top: window.top } : undefined,
       size: window.width && window.height ? { width: window.width, height: window.height } : undefined,
@@ -122,15 +124,18 @@ export class SessionsManager {
     ).filter(isNotNil)
     this.storedData.windows.push(swindow)
     this.storedData.tabs.push(...stabs)
-    await this.setWindowSession(window.id, swindow.session_id)
+    await this.setWindowAssociatedWindowId(window.id, associated_id)
     this.sortTabs()
     await this.triggerUpdate()
   }
 
-  async unlinkStoredSession(sessionId: string) {
-    this.data.windows = this.data.windows.map(w => (w.session_id === sessionId ? { ...w, session_id: undefined } : w))
-    this.storedData.tabs = this.storedData.tabs.filter(t => t.window_session_id !== sessionId)
-    this.storedData.windows = this.storedData.windows.filter(w => w.session_id !== sessionId)
+  async unlinkStoredSession(assiciatedId: string) {
+    const session = this.storedData.windows.find(w => w.associated_window_id === assiciatedId)
+    if (!session) return
+    if (!session.associated_window_id) return
+    this.data.windows = this.data.windows.map(w => (w.associated_window_id === session.associated_window_id ? { ...w, associated_window_id: undefined } : w))
+    this.storedData.tabs = this.storedData.tabs.filter(t => t.session_id !== session.session_id)
+    this.storedData.windows = this.storedData.windows.filter(w => w.session_id !== session.session_id)
     await this.triggerUpdate()
   }
 
@@ -282,17 +287,31 @@ export class SessionsManager {
   }
 
   async updateStoredData() {
-    const openedStoredWindows = this.data.windows.filter(w => !!w.session_id)
-    const openedStoredWindowsSessionIds = openedStoredWindows.map(w => w.session_id)
-    const storedWindowsIds = openedStoredWindows.map(w => w.id)
-    const inactiveStoredWindows = this.storedData.windows.filter(w => !openedStoredWindowsSessionIds.includes(w.session_id))
-    const inactiveStoredWindowsIds = inactiveStoredWindows.map(w => w.session_id)
-    const tabsToStore = this.data.tabs.filter(t => isNotNil(t.window_id) && storedWindowsIds.includes(t.window_id))
-    const newStoredTabs = (await Promise.all(tabsToStore.map(t => this.convertTabToStoredTab(t)))).filter(isNotNil)
-    const storedTabs = [...this.storedData.tabs.filter(t => inactiveStoredWindowsIds.includes(t.window_session_id))]
+    const associatedIdToSessionIdMap = this.getAssociationMap()
+    const validAssociatedIds = [...associatedIdToSessionIdMap.keys()]
+    const openedSessionWindows = this.data.windows.filter(w => w.associated_window_id && validAssociatedIds.includes(w.associated_window_id))
+    const openedSessionWindowsSessionIds = openedSessionWindows.map(w => associatedIdToSessionIdMap.get(w.associated_window_id!)!)
+    const openedSessionWindowsIds = openedSessionWindows.map(w => w.id)
+    const inactiveSessionWindows = this.storedData.windows.filter(w => !w.associated_window_id || !openedSessionWindowsSessionIds.includes(w.session_id))
+    const inactiveSessionWindowsIds = inactiveSessionWindows.map(w => w.session_id)
+    const tabsToStore = this.data.tabs.filter(t => isNotNil(t.window_id) && openedSessionWindowsIds.includes(t.window_id))
+    const newSessionTabs = (await Promise.all(tabsToStore.map(t => this.convertTabToStoredTab(t)))).filter(isNotNil)
+    const sessionTabs = [...this.storedData.tabs.filter(t => inactiveSessionWindowsIds.includes(t.session_id))]
 
-    this.storedData.tabs = sortStoredTabs([...storedTabs, ...newStoredTabs])
+    this.storedData.tabs = sortStoredTabs([...sessionTabs, ...newSessionTabs])
     this.setStoredData(this.storedData)
+  }
+
+  getAssociationMap() {
+    const map = new Map<string, string>()
+
+    for (const session of this.storedData.windows) {
+      if (session.associated_window_id) {
+        map.set(session.associated_window_id, session.session_id)
+      }
+    }
+
+    return map
   }
 
   sendMessage(message: OutgoingMessageDescriptor) {
@@ -301,10 +320,9 @@ export class SessionsManager {
 
   private async serializeWindow(window: browser.windows.Window): Promise<WindowDescriptor | null> {
     if (!window.id) return null
-    const session_id = (await this.getWindowSession(window.id)) ?? undefined
     return defineAll<WindowDescriptor>({
       id: window.id,
-      session_id,
+      associated_window_id: (await this.getAssociatedWindowId(window.id)) ?? undefined,
       focused: window.focused || undefined,
       incognito: window.incognito || undefined,
     })
@@ -320,23 +338,39 @@ export class SessionsManager {
 
   async convertTabToStoredTab(tab: TabDescriptor): Promise<SavedTabDescriptor | null> {
     if (isNil(tab.id) || isNil(tab.window_id) || !tab.url) return null
-    const sessionId = await this.getWindowSession(tab.window_id)
-    if (!sessionId) return null
-    return convertTabToStoredTab(sessionId, tab)
+    const session_id = await this.getWindowSessionId(tab.window_id)
+    if (!session_id) return null
+    return convertTabToStoredTab(session_id, tab)
   }
 
-  async getWindowSession(windowId?: number): Promise<string | null> {
+  async getAssociatedWindowId(windowId?: number): Promise<string | null> {
     if (isNil(windowId)) return null
-    return asString(await this.br.sessions.getWindowValue(windowId, SESSION_KEY)) ?? null
+    return asString(await this.br.sessions.getWindowValue(windowId, ASSOCIATED_SESSION_KEY)) ?? null
   }
 
-  async setWindowSession(windowId: number, id: string): Promise<void> {
-    await this.br.sessions.setWindowValue(windowId, SESSION_KEY, id)
-    this.data.windows = this.data.windows.map(w => (w.id === windowId ? { ...w, session_id: id } : w))
+  async getWindowSession(windowId?: number): Promise<SavedWindowDescriptor | null> {
+    const associated_window_id = await this.getAssociatedWindowId(windowId)
+    if (!associated_window_id) return null
+    const session = this.storedData.windows.find(w => w.associated_window_id === associated_window_id)
+    return session ?? null
   }
+
+  async getWindowSessionId(windowId?: number): Promise<string | null> {
+    return (await this.getWindowSession(windowId))?.session_id ?? null
+  }
+
+  async setWindowAssociatedWindowId(windowId: number, associated_id: string): Promise<void> {
+    await this.br.sessions.setWindowValue(windowId, ASSOCIATED_SESSION_KEY, associated_id)
+    this.data.windows = this.data.windows.map(w => (w.id === windowId ? { ...w, associated_window_id: associated_id } : w))
+  }
+
+  setSessionAssociatedWindowId(sessionId: string, associated_id: string) {
+    this.storedData.windows = this.storedData.windows.map(w => (w.session_id === sessionId ? { ...w, associated_window_id: associated_id } : w))
+  }
+
   async unsetWindowSession(windowId: number): Promise<void> {
-    await this.br.sessions.removeWindowValue(windowId, SESSION_KEY)
-    this.data.windows = this.data.windows.map(w => (w.id === windowId ? { ...w, session_id: undefined } : w))
+    await this.br.sessions.removeWindowValue(windowId, ASSOCIATED_SESSION_KEY)
+    this.data.windows = this.data.windows.map(w => (w.id === windowId ? { ...w, associated_window_id: undefined } : w))
   }
 
   async getStoredData() {
@@ -362,7 +396,7 @@ function sortTabs(tabs: TabDescriptor[]): TabDescriptor[] {
 
 function sortStoredTabs(tabs: SavedTabDescriptor[]): SavedTabDescriptor[] {
   return tabs.sort((a, b) => {
-    const cw = a.window_session_id.localeCompare(b.window_session_id)
+    const cw = a.session_id.localeCompare(b.session_id)
     if (cw !== 0) return cw
     return a.index - b.index
   })

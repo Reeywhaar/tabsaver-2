@@ -43,7 +43,7 @@ async function main() {
         return
       }
       case 'unlinkStored': {
-        await manager.unlinkStoredSession(message.sessionId)
+        await manager.unlinkStoredSession(message.associatedSessionId)
         return
       }
       default:

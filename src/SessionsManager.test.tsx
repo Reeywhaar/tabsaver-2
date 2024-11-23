@@ -150,7 +150,7 @@ describe('SessionsManager', () => {
     }
     const manager = new SessionsManager({
       browserApi: br,
-      data: { ...createTestSessions(), windows: [{ id: 0, focused: true, session_id: '0' }, { id: 1 }] },
+      data: { ...createTestSessions(), windows: [{ id: 0, focused: true, associated_window_id: '0' }, { id: 1 }] },
       storedData: {
         windows: [
           {
@@ -183,7 +183,7 @@ const createTestSessions = (length = 5): SessionsDescriptor => {
       ...new Array(length).fill(null).map((_, i) => createTabDescriptor({ id: i, index: i, window_id: 0, active: i === 0 })),
       ...new Array(length).fill(5).map((x, i) => createTabDescriptor({ id: x + i, index: i, window_id: 1, active: i === 0 })),
     ],
-    windows: [{ id: 0, focused: true }, { id: 1 }],
+    windows: [{ id: 0, focused: true, associated_window_id: '0' }, { id: 1 }],
   }
 }
 

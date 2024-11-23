@@ -10,9 +10,16 @@ import classNames from 'classnames'
 export const WindowsList: FunctionComponent = () => {
   const { windows } = useSessions()
   const stored = useStoredSessions()
+  const existingSessions = useMemo(() => stored.windows.map(w => w.associated_window_id).filter(isNotNil), [stored.windows])
 
-  const activeSessions = useMemo(() => windows.map(w => w.session_id).filter(isNotNil), [windows])
-  const inactiveStoredWindows = useMemo(() => stored.windows.filter(w => !activeSessions.includes(w.session_id)), [activeSessions, stored.windows])
+  const activeSessions = useMemo(
+    () => windows.map(w => (w.associated_window_id && existingSessions.includes(w.associated_window_id) ? w.associated_window_id : null)).filter(isNotNil),
+    [existingSessions, windows]
+  )
+  const inactiveStoredWindows = useMemo(
+    () => stored.windows.filter(w => !w.associated_window_id || !activeSessions.includes(w.associated_window_id)),
+    [activeSessions, stored.windows]
+  )
 
   return (
     <div className={classes.root}>

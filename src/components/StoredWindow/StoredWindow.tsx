@@ -39,7 +39,7 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
   const getActiveTabs = useEvent(() => activeTabs)
   const getStoredTabs = useEvent(() => tabs)
 
-  const windowTabs = useMemo(() => tabs.filter(t => t.window_session_id === window.session_id), [tabs, window.session_id])
+  const windowTabs = useMemo(() => tabs.filter(t => t.session_id === window.session_id), [tabs, window.session_id])
 
   const remove = useEvent(() => {
     push(controls => (
@@ -49,7 +49,7 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
           updateStoredSessions(stored => ({
             ...stored,
             windows: stored.windows.filter(w => w.session_id !== window.session_id),
-            tabs: stored.tabs.filter(t => t.window_session_id !== window.session_id),
+            tabs: stored.tabs.filter(t => t.session_id !== window.session_id),
           }))
         }}
         title={`Are you sure you want to delete "${window.title}"?`}
@@ -127,7 +127,7 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
           const tab = getActiveTabs().find(t => t.id === data.id)
           if (!tab) throw new Error('Tab not found')
           const maxIndex = getStoredTabs()
-            .filter(t => t.window_session_id === window.session_id)
+            .filter(t => t.session_id === window.session_id)
             .reduce((max, t) => Math.max(max, t.index), -1)
           const stab = convertTabToStoredTab(window.session_id, { ...tab, index: maxIndex + 1 })
           if (!stab) throw new Error('Failed to convert tab')

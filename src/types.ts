@@ -14,7 +14,7 @@ export type TabDescriptor = {
 
 export type WindowDescriptor = {
   id: number
-  session_id?: string
+  associated_window_id?: string
   focused?: boolean
   incognito?: boolean
 }
@@ -28,7 +28,7 @@ export const RT_SavedTabDescriptor = RT.object({
   id: RT.string(),
   url: RT.string(),
   title: RT.string().optional(),
-  window_session_id: RT.string(),
+  session_id: RT.string(),
   index: RT.number(),
   cookie_store_id: RT.string().optional(),
   favicon_url: RT.string().optional(),
@@ -38,7 +38,7 @@ export type SavedTabDescriptor = RT.Infer<typeof RT_SavedTabDescriptor>
 
 export const RT_SavedWindowDescriptor = RT.object({
   session_id: RT.string(),
-  associated_window_id: RT.number().optional(),
+  associated_window_id: RT.string().optional(),
   title: RT.string(),
   position: RT.object({ left: RT.number(), top: RT.number() }).optional(),
   size: RT.object({ width: RT.number(), height: RT.number() }).optional(),
@@ -80,5 +80,5 @@ export type IncomingMessageDescriptor =
     }
   | {
       type: 'unlinkStored'
-      sessionId: string
+      associatedSessionId: string
     }

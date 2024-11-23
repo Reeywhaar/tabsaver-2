@@ -22,7 +22,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   const { tabs } = useSessions()
   const titleRef = useRef<HTMLDivElement>(null)
   const [dragover, setDragover] = useState(false)
-  const { windows: storedWindows, tabs: storedTabs } = useStoredSessions()
+  const { windows: sessions, tabs: storedTabs } = useStoredSessions()
   const { updateStoredSessions } = useDataUpdate()
   const withErrorHandling = useWithErrorHandling()
 
@@ -44,12 +44,12 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   })
 
   const unlinkStoredHandler = useClickHandler(async () => {
-    const sid = window.session_id
+    const sid = window.associated_window_id
     if (!sid) throw new Error('No session id')
 
     sendRuntimeMessage(browser, {
       type: 'unlinkStored',
-      sessionId: sid,
+      associatedSessionId: sid,
     })
   })
 
@@ -120,7 +120,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   }, [browser, getStoredTabs, updateStoredSessions, window.id, withErrorHandling])
 
   const windowTabs = tabs.filter(tab => tab.window_id === window.id)
-  const storedSession = (window.session_id && storedWindows.find(w => w.session_id === window.session_id && w.associated_window_id === window.id)) || null
+  const storedSession = (window.associated_window_id && sessions.find(w => w.associated_window_id === window.associated_window_id)) || null
   const label: ReactNode = storedSession ? storedSession.title : `Window ${index + 1}`
   return (
     <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id}>
