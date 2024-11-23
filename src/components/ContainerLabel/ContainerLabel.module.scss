@@ -1,0 +1,11 @@
+@use '@app/styles/mixins.module' as *;
+
+.cnt {
+  border-radius: rpx(5);
+  padding: rpx(2) rpx(5);
+  font-size: 70%;
+
+  background-color: transparent;
+  background-color: var(--bg-color);
+  color: var(--text-color);
+}

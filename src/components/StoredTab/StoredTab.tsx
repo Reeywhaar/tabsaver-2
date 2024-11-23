@@ -17,6 +17,7 @@ import { usePush } from '../Popup/PopupContext'
 
 import classes from './StoredTab.module.scss'
 import { TabFavicon } from '../TabFavicon/TabFavicon'
+import { ContainerLabel } from '../ContainerLabel/ContainerLabel'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -85,6 +86,7 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
         {tab.title ?? tab.id} <span className={tabClasses.tab_url}>{tab.url}</span>
       </div>
       <Spacer />
+      <ContainerLabel id={tab.cookie_store_id} />
       <Icon className={tabClasses.tab_icon} name="close" {...removeHandler} />
     </div>
   )

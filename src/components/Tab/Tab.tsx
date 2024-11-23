@@ -18,6 +18,7 @@ import { isMiddleClick } from '@app/utils/isMiddleClick'
 import { useWithErrorHandling } from '@app/hooks/useShowError'
 import { isNil } from '@app/utils/isNil'
 import { TabFavicon } from '../TabFavicon/TabFavicon'
+import { ContainerLabel } from '../ContainerLabel/ContainerLabel'
 
 export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescriptor }> = ({ tab, window }) => {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -196,6 +197,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
         )}
       </div>
       <Spacer />
+      <ContainerLabel id={tab.cookie_store_id} />
       <Icon className={classes.tab_icon} name="close" {...removeHandler} />
     </div>
   )
