@@ -3,6 +3,8 @@ import { createRoot } from 'react-dom/client'
 import { DataProvider, useBrowser, useDataUpdate, useSessions, useStoredSessions } from './components/DataProvider'
 import { useEvent } from './hooks/useEvent'
 import { NotificationProvider, useNotification } from './components/Notifications/NotificationsContext'
+import { SavedTabDescriptor, SavedWindowDescriptor } from './types'
+import { v4 } from 'uuid'
 
 function main() {
   const root = createRoot(document.getElementsByClassName('main')[0])
@@ -28,47 +30,44 @@ const Diagnostics: FunctionComponent = () => {
   const notify = useNotification()
 
   const handleImport = useEvent(() => {
+    const words = ['horse', 'battery', 'staple', 'correct', 'summon', 'triest', 'bold', 'marrow', 'system']
+    const urls = [
+      'https://example.com',
+      'https://ya.ru',
+      'https://google.com',
+      'https://wikipedia.org',
+      'https://vyrtsev.com',
+      'https://www.youtube.com/watch?v=dQw4w9WgXcQ',
+      'https://facebook.com',
+      'https://vk.com',
+      'https://instagram.com',
+      'https://twitter.com',
+      'https://reddit.com',
+    ]
+
+    const windows: SavedWindowDescriptor[] = new Array(15).fill(null).map(() => ({
+      session_id: v4(),
+      title: new Array(5)
+        .fill(0)
+        .map(() => words[Math.floor(Math.random() * words.length)])
+        .join(' '),
+    }))
+
+    const tabs = windows.flatMap(w =>
+      new Array(5 + Math.floor(Math.random() * 20)).fill(null).map(
+        (_, i): SavedTabDescriptor => ({
+          id: `${w.session_id}:${i}`,
+          index: i,
+          session_id: w.session_id,
+          url: urls[Math.floor(Math.random() * urls.length)],
+          title: '',
+        })
+      )
+    )
+
     updateStoredSessions(_data => ({
-      windows: [
-        {
-          title: 'Saved window',
-          session_id: 'savedwindow',
-        },
-        {
-          title: 'Another saved window',
-          session_id: 'anothersavedwindow',
-        },
-      ],
-      tabs: [
-        {
-          id: 'savedwindow:1',
-          index: 0,
-          session_id: 'savedwindow',
-          url: 'https://example.com',
-          title: 'Example',
-        },
-        {
-          id: 'savedwindow:2',
-          index: 1,
-          session_id: 'savedwindow',
-          url: 'https://vyrtsev.com',
-          title: 'Vyrtsev',
-        },
-        {
-          id: 'anothersavedwindow:1',
-          index: 0,
-          session_id: 'anothersavedwindow',
-          url: 'https://ya.ru',
-          title: 'Yandex',
-        },
-        {
-          id: 'anothersavedwindow:2',
-          index: 1,
-          session_id: 'anothersavedwindow',
-          url: 'https://vyrtsev.com',
-          title: 'Vyrtsev',
-        },
-      ],
+      windows,
+      tabs,
     }))
   })
 
