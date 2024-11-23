@@ -45,3 +45,12 @@
   opacity: 0.6;
   font-size: 90% !important;
 }
+
+.incognito {
+  position: absolute;
+  left: rpx(-4);
+  width: rpx(8);
+  height: rpx(8);
+  background-color: $incognito;
+  border-radius: rpx(8);
+}

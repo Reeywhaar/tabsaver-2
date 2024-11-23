@@ -148,9 +148,11 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   }, [browser, getStoredTabs, updateStoredSessions, window.id, withErrorHandling])
 
   const label: ReactNode = storedSession ? storedSession.title : `Window ${index + 1}`
+
   return (
     <div className={classnames(classes.window, { [classes.is_active]: window.focused })} key={window.id}>
       <div className={classes.window_top} ref={titleRef} {...activateHandler}>
+        {window.incognito && <div className={classes.incognito} />}
         <div className={classes.window_title}>{label}</div>
         <Spacer />
         {storedSession && <Icon className={classes.icon} name="edit" title="Rename" {...renameHandler} />}

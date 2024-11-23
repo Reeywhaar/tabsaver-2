@@ -52,7 +52,7 @@ export class SessionsManager {
   }
 
   async getInitialData() {
-    const windows = await this.br.windows.getAll({ populate: true })
+    const windows = await this.br.windows.getAll({ populate: true, windowTypes: ['normal'] })
     this.data.windows = []
     this.data.tabs = []
 
@@ -61,7 +61,6 @@ export class SessionsManager {
     this.logger?.info('[tabsaver] [background] initial windows', windows)
     for (const window of windows) {
       if (!window.id) return
-      if (window.incognito) return
 
       const swindow = await this.serializeWindow(window)
       if (!swindow) continue
@@ -252,6 +251,7 @@ export class SessionsManager {
   }
 
   windowCreatedHandler = async (window: browser.windows.Window) => {
+    if (window.type !== 'normal') return
     this.logger?.info('[tabsaver] [background] Window created', window)
 
     const swindow = await this.serializeWindow(window)
