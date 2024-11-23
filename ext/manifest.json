@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Tab Saver 2",
-  "version": "0.0.1-a.1",
+  "version": "0.0.1",
   "description": "Allows you to manage window sessions",
   "icons": {
     "48": "icons/icon.svg",
@@ -31,7 +31,7 @@
   "incognito": "spanning",
   "applications": {
     "gecko": {
-      "id": "{3c764d86-a50a-4f5c-b773-cb84bea924e7}",
+      "id": "{40298203-96e5-4bb1-b76d-efb56112024a}",
       "strict_min_version": "62.0"
     }
   },
