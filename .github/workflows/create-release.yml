@@ -1,42 +1,42 @@
-name: "Release"
+name: 'Release'
 on:
   push:
     tags:
-      - "*.*.*"
+      - '*.*.*'
 
 jobs:
   release:
-    name: "Release"
+    name: 'Release'
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout"
+      - name: 'Checkout'
         uses: actions/checkout@v1
 
-      - name: "NPM Install"
+      - name: 'NPM Install'
         run: npm install
 
-      - name: "Compile"
+      - name: 'Compile'
         run: npm run compile:prod
 
-      - name: "web-ext build"
+      - name: 'web-ext build'
         id: web-ext-build
         uses: kewisch/action-web-ext@a28b4ba2f491cc36c67a714a716ca54218440056
         with:
           cmd: build
           source: ext
 
-      - name: "web-ext sign"
+      - name: 'web-ext sign'
         id: web-ext-sign
         uses: kewisch/action-web-ext@a28b4ba2f491cc36c67a714a716ca54218440056
         with:
           cmd: sign
           source: ${{ steps.web-ext-build.outputs.target }}
-          channel: listed
+          channel: unlisted
           apiKey: ${{ secrets.FIREFOX_API_KEY }}
           apiSecret: ${{ secrets.FIREFOX_API_SECRET }}
 
-      - name: "Create Release"
-        uses: softprops/action-gh-release@810bfa2cd5f7c2bd4138fa75005d437ba562db81
+      - name: 'Create Release'
+        uses: softprops/action-gh-release@v2
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         with:
