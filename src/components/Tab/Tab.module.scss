@@ -44,6 +44,13 @@
   vertical-align: -2px;
 }
 
+.icon_placeholder {
+  background: rgba(128, 128, 128, 0.2);
+  width: rpx(16);
+  height: rpx(16);
+  border-radius: rpx(5);
+}
+
 .tab_url {
   opacity: 0.8;
   font-style: italic;

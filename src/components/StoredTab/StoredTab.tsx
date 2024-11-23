@@ -15,7 +15,8 @@ import { useEvent } from '@app/hooks/useEvent'
 import { isMiddleClick } from '@app/utils/isMiddleClick'
 import { ConfirmPopup } from '../ConfirmPopup/ConfirmPopup'
 import { usePush } from '../Popup/PopupContext'
-import { isNotNil } from '@app/utils/isNotNil'
+
+import classes from './StoredTab.module.scss'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -30,14 +31,20 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
   const getTab = useEvent(() => tab)
 
   const remove = useEvent(() => {
-    const tabLabel = [tab.title, tab.url].filter(isNotNil).join(' — ')
     push(controls => (
       <ConfirmPopup
         controls={controls}
         onConfirm={() => {
           updateStoredSessions(stored => ({ ...stored, tabs: stored.tabs.filter(t => t.id !== tab.id) }))
         }}
-        title={`Are you sure you want to delete tab "${tabLabel}"?`}
+        title={
+          <div>
+            <div>
+              Are you sure you want to delete tab <strong>"{tab.title ?? '...'}"</strong>?
+            </div>
+            <div className={classes.confirm_url}>{tab.url}</div>
+          </div>
+        }
       />
     ))
   })
@@ -72,7 +79,11 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
 
   return (
     <div className={tabClasses.tab} draggable={true} onAuxClick={handleAuxClick} ref={rootRef}>
-      {isFaviconIncluded(tab.favicon_url) && <img alt="" className={tabClasses.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />}
+      {isFaviconIncluded(tab.favicon_url) ? (
+        <img alt="" className={tabClasses.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />
+      ) : (
+        <div className={tabClasses.icon_placeholder} />
+      )}
       <div className={tabClasses.tab_label}>
         {tab.title ?? tab.id} <span className={tabClasses.tab_url}>{tab.url}</span>
       </div>

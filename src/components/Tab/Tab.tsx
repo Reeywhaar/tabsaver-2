@@ -182,7 +182,11 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
       title={title}
       {...clickHandler}
     >
-      {isFaviconIncluded(tab.favicon_url) && <img alt="" className={classes.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />}
+      {isFaviconIncluded(tab.favicon_url) ? (
+        <img alt="" className={classes.tab_fav} src={tab.favicon_url} title={tab.favicon_url} />
+      ) : (
+        <div className={classes.icon_placeholder} />
+      )}
       <div className={classes.tab_label}>
         {joinNodesWithIds(
           [

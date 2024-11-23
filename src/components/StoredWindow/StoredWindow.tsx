@@ -52,7 +52,11 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
             tabs: stored.tabs.filter(t => t.session_id !== window.session_id),
           }))
         }}
-        title={`Are you sure you want to delete "${window.title}"?`}
+        title={
+          <div>
+            Are you sure you want to delete <strong>"{window.title}"</strong>?
+          </div>
+        }
       />
     ))
   })
