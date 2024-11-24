@@ -57,11 +57,16 @@ export type SavedSessionsDescriptor = {
   tabs: SavedTabDescriptor[]
 }
 
-export type OutgoingMessageDescriptor = {
-  type: 'update'
-  data: SessionsDescriptor
-  storedData: SavedSessionsDescriptor
-}
+export type OutgoingMessageDescriptor =
+  | {
+      type: 'update'
+      data: SessionsDescriptor
+      storedData: SavedSessionsDescriptor
+    }
+  | {
+      type: 'error'
+      message: string
+    }
 
 export type IncomingMessageDescriptor =
   | {

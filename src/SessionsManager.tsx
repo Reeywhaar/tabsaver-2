@@ -17,6 +17,7 @@ import { promiseIntoResult } from './utils/intoResult'
 import { asResultOk } from './utils/Result'
 import { convertStoredTabToTabCreateProperties } from './utils/convertStoredTabToTabCreateProperties'
 import { convertTabToStoredTab } from './utils/convertTabToStoredTab'
+import { asError } from './utils/asError'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -87,13 +88,17 @@ export class SessionsManager {
     this.setSessionAssociatedWindowId(session.session_id, associated_id)
     let wtab = cwindow.tabs?.at(0) ?? null
     for (const tab of tabs) {
-      await this.br.tabs.create({
-        ...convertStoredTabToTabCreateProperties(tab),
-        windowId: cwindow.id,
-      })
-      if (wtab?.id) {
-        await this.br.tabs.remove(wtab.id)
-        wtab = null
+      try {
+        await this.br.tabs.create({
+          ...convertStoredTabToTabCreateProperties(tab),
+          windowId: cwindow.id,
+        })
+        if (wtab?.id) {
+          await this.br.tabs.remove(wtab.id)
+          wtab = null
+        }
+      } catch (e) {
+        this.sendMessage({ type: 'error', message: asError(e).message })
       }
     }
     await this.triggerUpdate()

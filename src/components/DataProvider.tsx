@@ -2,6 +2,7 @@ import React, { createContext, FunctionComponent, PropsWithChildren, useContext,
 import { OutgoingMessageDescriptor, SavedSessionsDescriptor, SessionsDescriptor } from '@app/types'
 import { sendRuntimeMessage } from '@app/utils/sendRuntimeMessage'
 import { useEvent } from '@app/hooks/useEvent'
+import { assertNever } from '@app/utils/assertNever'
 
 export type Data = {
   sessions: SessionsDescriptor
@@ -70,6 +71,11 @@ export const DataProvider: FunctionComponent<PropsWithChildren<{ br: typeof brow
             storedSessions: message.storedData,
             br: browser,
           })
+          break
+        case 'error':
+          break
+        default:
+          assertNever(message)
       }
     }
 
