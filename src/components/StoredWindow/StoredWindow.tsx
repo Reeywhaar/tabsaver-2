@@ -15,11 +15,11 @@ import { useWithErrorHandling } from '@app/hooks/useShowError'
 import { extractTabData, hasTabData } from '@app/utils/tabData'
 import { DRAGGABLE_SAVED_TAB_MIME, DRAGGABLE_TAB_MIME } from '@app/constants'
 import { assertNever } from '@app/utils/assertNever'
-import { convertTabToStoredTab } from '@app/utils/convertTabToStoredTab'
 import { useEvent } from '@app/hooks/useEvent'
 import { usePush } from '../Popup/PopupContext'
 import { RenamePopup } from '../RenamePopup/RenamePopup'
 import { ConfirmPopup } from '../ConfirmPopup/ConfirmPopup'
+import { SessionsHelper } from '@app/SessionsHelper'
 
 export type StoredWindowProps = {
   window: SavedWindowDescriptor
@@ -46,11 +46,11 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
       <ConfirmPopup
         controls={controls}
         onConfirm={() => {
-          updateStoredSessions(stored => ({
-            ...stored,
-            windows: stored.windows.filter(w => w.session_id !== window.session_id),
-            tabs: stored.tabs.filter(t => t.session_id !== window.session_id),
-          }))
+          updateStoredSessions(stored => {
+            const helper = new SessionsHelper(stored)
+            helper.removeSession(window.session_id)
+            return helper.data
+          })
         }}
         title={
           <div>
@@ -66,10 +66,11 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
       <RenamePopup
         ctx={ctx}
         onUpdate={value => {
-          updateStoredSessions(stored => ({
-            ...stored,
-            windows: stored.windows.map(w => (w.session_id === window.session_id ? { ...w, title: value } : w)),
-          }))
+          updateStoredSessions(stored => {
+            const helper = new SessionsHelper(stored)
+            helper.renameSession(window.session_id, value)
+            return helper.data
+          })
           ctx.close()
         }}
         value={window.title}
@@ -130,35 +131,30 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
           console.info('[Tabsaver] moving tab to stored window', data, 'to', window.session_id)
           const tab = getActiveTabs().find(t => t.id === data.id)
           if (!tab) throw new Error('Tab not found')
-          const maxIndex = getStoredTabs()
-            .filter(t => t.session_id === window.session_id)
-            .reduce((max, t) => Math.max(max, t.index), -1)
-          const stab = convertTabToStoredTab(window.session_id, { ...tab, index: maxIndex + 1 })
-          if (!stab) throw new Error('Failed to convert tab')
 
-          updateStoredSessions(stored => ({
-            ...stored,
-            tabs: [...stored.tabs, stab],
-          }))
+          updateStoredSessions(stored => {
+            const helper = new SessionsHelper(stored)
+            helper.addTab(tab, window.session_id)
+            return helper.data
+          })
           if (e.dataTransfer?.dropEffect === 'move') {
             await browser.tabs.remove(data.id)
           }
           break
         }
         case DRAGGABLE_SAVED_TAB_MIME: {
-          // todo: implement
+          const isMove = e.dataTransfer?.dropEffect === 'move'
+          if (data.session_id === window.session_id) return
 
-          // const stab = getStoredTabs().find(t => t.id === data.id)
-          // if (!stab) return
-          // console.info('[Tabsaver] moving stored tab to window', data, 'to', window.id)
-          // const props = convertStoredTabToTabCreateProperties(stab)
-          // await browser.tabs.create({ ...props, windowId: window.id, index: Number.MAX_SAFE_INTEGER })
-          // if (e.dataTransfer?.dropEffect === 'move') {
-          //   updateStoredSessions(stored => ({
-          //     ...stored,
-          //     tabs: stored.tabs.filter(t => t.id !== data.id),
-          //   }))
-          // }
+          updateStoredSessions(stored => {
+            const helper = new SessionsHelper(stored)
+            if (isMove) {
+              helper.moveTab(data.id, window.session_id)
+            } else {
+              helper.copyTab(data.id, window.session_id)
+            }
+            return helper.data
+          })
           break
         }
         default:

@@ -395,7 +395,7 @@ function sortTabs(tabs: TabDescriptor[]): TabDescriptor[] {
 }
 
 function sortStoredTabs(tabs: SavedTabDescriptor[]): SavedTabDescriptor[] {
-  return tabs.sort((a, b) => {
+  return tabs.toSorted((a, b) => {
     const cw = a.session_id.localeCompare(b.session_id)
     if (cw !== 0) return cw
     return a.index - b.index

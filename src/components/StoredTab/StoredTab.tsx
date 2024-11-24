@@ -1,15 +1,15 @@
-import React, { FunctionComponent, MouseEventHandler, ReactNode, useEffect, useRef } from 'react'
+import React, { FunctionComponent, MouseEventHandler, ReactNode, useEffect, useRef, useState } from 'react'
 import { SavedTabDescriptor, SavedWindowDescriptor } from '@app/types'
 
 import { Spacer } from '../Spacer/Spacer'
 import { Icon } from '../Icon/Icon'
-import { useDataUpdate } from '../DataProvider'
+import { useDataUpdate, useSessions } from '../DataProvider'
 import { useClickHandler } from '@app/hooks/useClickHandler'
 
 import tabClasses from '../Tab/Tab.module.scss'
-import { DragSavedTabData } from '@app/utils/tabData'
+import { DragSavedTabData, extractTabData, hasTabData } from '@app/utils/tabData'
 import { defineAll } from '@app/utils/defineAll'
-import { DRAGGABLE_SAVED_TAB_MIME } from '@app/constants'
+import { DRAGGABLE_SAVED_TAB_MIME, DRAGGABLE_TAB_MIME } from '@app/constants'
 import { useEvent } from '@app/hooks/useEvent'
 import { isMiddleClick } from '@app/utils/isMiddleClick'
 import { ConfirmPopup } from '../ConfirmPopup/ConfirmPopup'
@@ -20,6 +20,10 @@ import { TabFavicon } from '../TabFavicon/TabFavicon'
 import { ContainerLabel } from '../ContainerLabel/ContainerLabel'
 import { joinNodesWithIds } from '@app/utils/joinNodes'
 import { excludedURLS } from '../Tab/Tab'
+import { useWithErrorHandling } from '@app/hooks/useShowError'
+import classNames from 'classnames'
+import { SessionsHelper } from '@app/SessionsHelper'
+import { assertNever } from '@app/utils/assertNever'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -28,17 +32,26 @@ export type StoredTabProps = {
 
 export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
   const rootRef = useRef<HTMLDivElement>(null)
+  const { tabs } = useSessions()
   const { updateStoredSessions } = useDataUpdate()
+  const [dragover, setDragover] = useState<null | 'top' | 'bottom'>()
   const push = usePush()
+  const withErrorHandling = useWithErrorHandling()
 
   const getTab = useEvent(() => tab)
+
+  const getTabs = useEvent(() => tabs)
 
   const remove = useEvent(() => {
     push(controls => (
       <ConfirmPopup
         controls={controls}
         onConfirm={() => {
-          updateStoredSessions(stored => ({ ...stored, tabs: stored.tabs.filter(t => t.id !== tab.id) }))
+          updateStoredSessions(stored => {
+            const helper = new SessionsHelper(stored)
+            helper.removeTab(tab.id)
+            return helper.data
+          })
         }}
         title={
           <div>
@@ -81,6 +94,105 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
     }
   }, [getTab])
 
+  useEffect(() => {
+    const el = rootRef.current!
+
+    let height = el.getBoundingClientRect().height
+    let dragover: null | 'top' | 'bottom' = null
+
+    const enter = () => {
+      height = el.getBoundingClientRect().height
+    }
+
+    const over = (e: DragEvent) => {
+      if (!e.dataTransfer) return
+      if (hasTabData(e)) {
+        e.preventDefault()
+      }
+      if (e.offsetY > height / 2) {
+        dragover = 'bottom'
+        setDragover('bottom')
+      } else {
+        dragover = 'top'
+        setDragover('top')
+      }
+    }
+
+    const leave = () => {
+      dragover = null
+      setDragover(null)
+    }
+
+    const drop = withErrorHandling(async (e: DragEvent) => {
+      const tab = getTab()
+      const dr = dragover
+      dragover = null
+      setDragover(null)
+      const data = extractTabData(e)
+      if (!data) return
+      e.preventDefault()
+      switch (data.type) {
+        case DRAGGABLE_TAB_MIME: {
+          const wtab = getTabs().find(t => t.id === data.id)
+          if (!wtab) throw new Error(`Tab ${data.id} not found`)
+          const index = tab.index + (dr === 'bottom' ? 1 : 0)
+          console.info('[Tabsaver] moving tab', data, 'to', tab.session_id, index)
+          updateStoredSessions(stored => {
+            const helper = new SessionsHelper(stored)
+            helper.addTab(wtab, tab.session_id, index)
+            return helper.data
+          })
+          if (e.dataTransfer?.dropEffect === 'move') {
+            await browser.tabs.remove(data.id)
+          }
+          break
+        }
+        case DRAGGABLE_SAVED_TAB_MIME: {
+          const tab = getTab()
+          const isSameSession = data.session_id === tab.session_id
+          const index = (() => {
+            if (isSameSession) {
+              if (data.index < tab.index) {
+                return dr === 'top' ? tab.index - 1 : tab.index
+              }
+              return dr === 'top' ? tab.index : tab.index + 1
+            }
+            return tab.index + (dr === 'bottom' ? 1 : 0)
+          })()
+          console.info('[Tabsaver] moving stored tab', data, 'to', tab.session_id, index ?? 'undefined')
+          const isMove = e.dataTransfer?.dropEffect === 'move'
+          updateStoredSessions(stored => {
+            const stab = stored.tabs.find(t => t.id === data.id)
+            if (!stab) throw new Error(`Cannot find tab ${data.id}`)
+            const helper = new SessionsHelper(stored)
+            if (isSameSession || isMove) {
+              helper.moveTab(data.id, tab.session_id, index)
+            } else {
+              helper.copyTab(data.id, tab.session_id, index)
+            }
+
+            return helper.data
+          })
+          break
+        }
+        default:
+          return assertNever(data)
+      }
+    })
+
+    el.addEventListener('dragenter', enter, true)
+    el.addEventListener('dragover', over, true)
+    el.addEventListener('dragleave', leave, true)
+    el.addEventListener('drop', drop, true)
+
+    return () => {
+      el.removeEventListener('dragenter', enter, true)
+      el.removeEventListener('dragover', over, true)
+      el.removeEventListener('dragleave', leave, true)
+      el.removeEventListener('drop', drop, true)
+    }
+  }, [getTab, getTabs, updateStoredSessions, withErrorHandling])
+
   const label = (() => {
     const parts: { key: string; node: ReactNode }[] = []
     if (tab.title) {
@@ -96,7 +208,12 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
   })()
 
   return (
-    <div className={tabClasses.tab} draggable={true} onAuxClick={handleAuxClick} ref={rootRef}>
+    <div
+      className={classNames(tabClasses.tab, dragover === 'top' ? tabClasses.is_dragover_top : dragover === 'bottom' ? tabClasses.is_dragover_bottom : null)}
+      draggable={true}
+      onAuxClick={handleAuxClick}
+      ref={rootRef}
+    >
       {tab.pinned && <div className={tabClasses.pin} />}
       <TabFavicon url={tab.favicon_url} />
       <div className={tabClasses.tab_label}>
