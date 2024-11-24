@@ -34,8 +34,9 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
 
   const handleAuxClick = useEvent<MouseEventHandler>(e => {
     if (isMiddleClick(e.nativeEvent)) {
-      browser.tabs.remove(tab.id)
       e.preventDefault()
+      e.stopPropagation()
+      browser.tabs.remove(tab.id)
       return
     }
   })

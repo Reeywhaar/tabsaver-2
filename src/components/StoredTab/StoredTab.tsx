@@ -58,6 +58,7 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
   const handleAuxClick = useEvent<MouseEventHandler>(e => {
     if (isMiddleClick(e.nativeEvent)) {
       e.preventDefault()
+      e.stopPropagation()
       remove()
     }
   })
