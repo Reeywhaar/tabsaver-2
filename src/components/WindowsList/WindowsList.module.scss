@@ -1,6 +1,7 @@
 @use '@app/styles/mixins.module' as *;
 
 .root {
+  overflow: auto;
   background-color: $gray_xxx;
 }
 
