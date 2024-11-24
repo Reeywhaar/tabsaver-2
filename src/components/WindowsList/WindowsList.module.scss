@@ -3,10 +3,12 @@
 .root {
   overflow: auto;
   background-color: $gray_xxx;
+  display: flex;
+  flex-direction: column;
 }
 
 .window {
-  margin: unit(0.5);
+  margin: unit(0.25);
   border-radius: unit(0.5);
   overflow: hidden;
   box-shadow: 0 0 rpx(1) rgba(0, 0, 0, 0.6);
