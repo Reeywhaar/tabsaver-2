@@ -1,3 +1,5 @@
+# This is a continuation of a [TabSaver](https://github.com/Reeywhaar/tabsaver) Addon. Work is still in progress, Readme is outdated.
+
 ![Logo](ext/icons/icon.svg)
 
 # Tab Saver
