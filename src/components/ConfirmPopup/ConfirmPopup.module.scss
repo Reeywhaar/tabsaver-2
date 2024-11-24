@@ -6,7 +6,7 @@
   justify-content: center;
   height: 100%;
   pointer-events: none;
-  padding: unit(0.5);
+  padding: unit(0.25);
 }
 
 .content {
@@ -14,7 +14,7 @@
   pointer-events: all;
   padding: unit(1);
   background: white;
-  border-radius: rpx(5);
+  border-radius: rpx(8);
 
   display: flex;
   flex-direction: column;

@@ -159,12 +159,19 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
     }
   }, [browser.tabs, getStoredTabs, getTab, updateStoredSessions, withErrorHandling])
 
-  const label: ReactNode = (() => {
-    if (!tab.title) return <i>Unnamed tab</i>
-    return tab.title
+  const label = (() => {
+    const parts: { key: string; node: ReactNode }[] = []
+    if (tab.title) {
+      parts.push({ key: 'title', node: <span>{tab.title}</span> })
+    }
+    if (tab.url && !excludedURLS.includes(tab.url)) {
+      parts.push({ key: 'url', node: <span className={classes.tab_url}>{tab.url}</span> })
+    }
+    if (!parts.length) {
+      parts.push({ key: 'empty', node: <span className={classes.tab_url}>Empty Tab</span> })
+    }
+    return parts
   })()
-
-  const url = excludedURLS.includes(tab.url) ? null : tab.url
 
   const title = [tab.title, tab.url].filter(Boolean).join('\n')
 
@@ -185,17 +192,11 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
       {tab.pinned && <div className={classes.pin} />}
       <TabFavicon url={tab.favicon_url} />
       <div className={classes.tab_label}>
-        {joinNodesWithIds(
-          [
-            { key: 'label', node: <span>{label}</span> },
-            { key: 'url', node: url ? <span className={classes.tab_url}>{url}</span> : null },
-          ],
-          index => (
-            <span className={classes.tab_separator} key={`spacer-${index}`}>
-              {' — '}
-            </span>
-          )
-        )}
+        {joinNodesWithIds(label, index => (
+          <span className={classes.tab_separator} key={`spacer-${index}`}>
+            {' — '}
+          </span>
+        ))}
       </div>
       <Spacer />
       <ContainerLabel id={tab.cookie_store_id} />
@@ -215,4 +216,4 @@ const getTabData = (tab: TabDescriptor): string => {
   )
 }
 
-const excludedURLS = ['about:newtab', 'about:home', 'about:blank']
+export const excludedURLS = ['about:newtab', 'about:home', 'about:blank']

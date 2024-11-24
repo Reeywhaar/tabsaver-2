@@ -25,7 +25,7 @@ export const ConfirmPopup: FunctionComponent<{ controls: PopupControls; title: R
             <button className={buttonClasses.button} {...handleBailHandler}>
               No
             </button>
-            <button className={buttonClasses.button} {...handleConfirmHandler}>
+            <button autoFocus className={buttonClasses.button} {...handleConfirmHandler}>
               Yes
             </button>
           </div>

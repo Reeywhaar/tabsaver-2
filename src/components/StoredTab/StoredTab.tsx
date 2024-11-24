@@ -1,4 +1,4 @@
-import React, { FunctionComponent, MouseEventHandler, useEffect, useRef } from 'react'
+import React, { FunctionComponent, MouseEventHandler, ReactNode, useEffect, useRef } from 'react'
 import { SavedTabDescriptor, SavedWindowDescriptor } from '@app/types'
 
 import { Spacer } from '../Spacer/Spacer'
@@ -18,6 +18,8 @@ import { usePush } from '../Popup/PopupContext'
 import classes from './StoredTab.module.scss'
 import { TabFavicon } from '../TabFavicon/TabFavicon'
 import { ContainerLabel } from '../ContainerLabel/ContainerLabel'
+import { joinNodesWithIds } from '@app/utils/joinNodes'
+import { excludedURLS } from '../Tab/Tab'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -79,12 +81,30 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
     }
   }, [getTab])
 
+  const label = (() => {
+    const parts: { key: string; node: ReactNode }[] = []
+    if (tab.title) {
+      parts.push({ key: 'title', node: <span>{tab.title}</span> })
+    }
+    if (tab.url && !excludedURLS.includes(tab.url)) {
+      parts.push({ key: 'url', node: <span className={tabClasses.tab_url}>{tab.url}</span> })
+    }
+    if (!parts.length) {
+      parts.push({ key: 'empty', node: <span className={tabClasses.tab_url}>Empty Tab</span> })
+    }
+    return parts
+  })()
+
   return (
     <div className={tabClasses.tab} draggable={true} onAuxClick={handleAuxClick} ref={rootRef}>
       {tab.pinned && <div className={tabClasses.pin} />}
       <TabFavicon url={tab.favicon_url} />
       <div className={tabClasses.tab_label}>
-        {tab.title ?? tab.id} <span className={tabClasses.tab_url}>{tab.url}</span>
+        {joinNodesWithIds(label, index => (
+          <span className={classes.tab_separator} key={`spacer-${index}`}>
+            {' — '}
+          </span>
+        ))}
       </div>
       <Spacer />
       <ContainerLabel id={tab.cookie_store_id} />
