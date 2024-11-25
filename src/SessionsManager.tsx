@@ -18,6 +18,7 @@ import { asResultOk } from './utils/Result'
 import { convertStoredTabToTabCreateProperties } from './utils/convertStoredTabToTabCreateProperties'
 import { convertTabToStoredTab } from './utils/convertTabToStoredTab'
 import { asError } from './utils/asError'
+import { URLMangler } from './URLMangler'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -89,10 +90,7 @@ export class SessionsManager {
     let wtab = cwindow.tabs?.at(0) ?? null
     for (const tab of tabs) {
       try {
-        await this.br.tabs.create({
-          ...convertStoredTabToTabCreateProperties(tab),
-          windowId: cwindow.id,
-        })
+        this.openTab(tab, cwindow.id)
         if (wtab?.id) {
           await this.br.tabs.remove(wtab.id)
           wtab = null
@@ -102,6 +100,17 @@ export class SessionsManager {
       }
     }
     await this.triggerUpdate()
+  }
+
+  async openTab(tab: SavedTabDescriptor, windowId: number) {
+    let props = convertStoredTabToTabCreateProperties(tab)
+    try {
+      await this.br.tabs.create({ ...props, windowId })
+    } catch (e) {
+      const mangler = new URLMangler(this.br)
+      props = { ...props, url: mangler.getMangledURL(props.url!) }
+      await this.br.tabs.create({ ...props, windowId })
+    }
   }
 
   async linkWindow(windowId: number) {
