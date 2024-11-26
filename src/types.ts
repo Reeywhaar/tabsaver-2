@@ -39,6 +39,7 @@ export type SavedTabDescriptor = RT.Infer<typeof RT_SavedTabDescriptor>
 
 export const RT_SavedWindowDescriptor = RT.object({
   session_id: RT.string(),
+  // todo: move to some other storage so it won't get exported
   associated_window_id: RT.string().optional(),
   title: RT.string(),
   position: RT.object({ left: RT.number(), top: RT.number() }).optional(),
