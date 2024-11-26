@@ -181,6 +181,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
         classes.tab,
         { [classes.is_window_active]: window?.focused },
         { [classes.is_active]: tab.active },
+        { [classes.is_discarded]: tab.discarded },
         dragover === 'top' ? classes.is_dragover_top : dragover === 'bottom' ? classes.is_dragover_bottom : null
       )}
       draggable={true}

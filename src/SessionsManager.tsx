@@ -19,6 +19,7 @@ import { convertStoredTabToTabCreateProperties } from './utils/convertStoredTabT
 import { convertTabToStoredTab } from './utils/convertTabToStoredTab'
 import { asError } from './utils/asError'
 import { URLMangler } from './URLMangler'
+import { sleep } from './utils/sleep'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -88,9 +89,11 @@ export class SessionsManager {
     await this.setWindowAssociatedWindowId(cwindow.id, associated_id)
     this.setSessionAssociatedWindowId(session.session_id, associated_id)
     let wtab = cwindow.tabs?.at(0) ?? null
+    const discardIds: number[] = []
     for (const tab of tabs) {
       try {
-        await this.openTab(tab, cwindow.id)
+        const tabToDiscard = await this.openTab(tab, cwindow.id)
+        if (tabToDiscard) discardIds.push(tabToDiscard.id!)
         if (wtab?.id) {
           await this.br.tabs.remove(wtab.id)
           wtab = null
@@ -99,13 +102,18 @@ export class SessionsManager {
         this.sendMessage({ type: 'error', message: asError(e).message })
       }
     }
+    // todo: think of better solution to discard tabs rather than waiting a bit to fetch initial data
+    await sleep(500)
+    await this.br.tabs.discard(discardIds)
     await this.triggerUpdate()
   }
 
   async openTab(tab: SavedTabDescriptor, windowId: number) {
     let props = convertStoredTabToTabCreateProperties(tab)
     try {
-      await this.br.tabs.create({ ...props, windowId })
+      const discarded = !!props.url && !props.url.startsWith('about:')
+      const tab = await this.br.tabs.create({ ...props, windowId })
+      if (discarded) return tab
     } catch (e) {
       const mangler = new URLMangler(this.br)
       props = { ...props, url: mangler.getMangledURL(props.url!) }
@@ -419,7 +427,7 @@ function sortStoredTabs(tabs: SavedTabDescriptor[]): SavedTabDescriptor[] {
 function serializeTab(tab: browser.tabs.Tab): TabDescriptor | null {
   if (!tab.url || !tab.id) return null
 
-  return {
+  return defineAll<TabDescriptor>({
     id: tab.id,
     url: tab.url,
     index: tab.index,
@@ -429,5 +437,6 @@ function serializeTab(tab: browser.tabs.Tab): TabDescriptor | null {
     active: tab.active || undefined,
     pinned: tab.pinned || undefined,
     cookie_store_id: tab.cookieStoreId === DEFAULT_COOKIE_STORE_ID ? undefined : tab.cookieStoreId,
-  }
+    discarded: tab.discarded,
+  })
 }

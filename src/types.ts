@@ -10,6 +10,7 @@ export type TabDescriptor = {
   active?: boolean
   pinned?: boolean
   cookie_store_id?: string
+  discarded?: boolean
 }
 
 export type WindowDescriptor = {

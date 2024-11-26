@@ -81,6 +81,16 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
     })
   })
 
+  const discardHandler = useClickHandler(async () => {
+    const activeTab = windowTabs.find(t => t.url === 'about:newtab')
+    if (activeTab) {
+      browser.tabs.update(activeTab.id, { active: true })
+    } else {
+      await browser.tabs.create({ windowId: window.id })
+    }
+    browser.tabs.discard(windowTabs.map(t => t.id))
+  })
+
   useEffect(() => {
     const el = titleRef.current!
 
@@ -155,6 +165,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
         {window.incognito && <div className={classes.incognito} />}
         <div className={classes.window_title}>{label}</div>
         <Spacer />
+        <Icon className={classes.icon} name="power" title="Discard" {...discardHandler} />
         {storedSession && <Icon className={classes.icon} name="edit" title="Rename" {...renameHandler} />}
         {storedSession ? (
           <Icon className={classes.icon} name="minus" title="Unlink session" {...unlinkStoredHandler} />
