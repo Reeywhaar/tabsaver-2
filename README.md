@@ -1,13 +1,24 @@
-# This is a continuation of a [TabSaver](https://github.com/Reeywhaar/tabsaver) Addon. Work is still in progress, Readme is outdated.
+# TabSaver 2
 
 ![Logo](ext/icons/icon.svg)
 
 # Tab Saver
 
 WebExtension to manage your tabs.
-With this extension you can save tabs in current window and open them later.
+With this extension you can save tabs in current window and open them later. It tracks tabs in opened windows, so if you save it as session (`+` icon on a window block), you can close the window and restore it later.
 
-[Install from addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/vyrtsev-tab-saver/)
+It is continuation of my [TabSaver](https://github.com/Reeywhaar/tabsaver) addon, but it is made simpler and there is no need to always save session when you want to close window. Sessions are tracked automatically.
+
+Supports:
+
+- Drag and drop between tab sessions, even without saving session it is useful to drag tabs between multiple windows.
+- [Tab containers](https://support.mozilla.org/en-US/kb/how-use-firefox-containers)
+
+# Install
+
+As of now you can install it from [Releases](https://github.com/Reeywhaar/tabsaver-2/releases/latest) page, while there is still some work to be done. Later it will be published in AMO
+
+<!-- [Install from addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/vyrtsev-tab-saver/) -->
 
 ### Caveats
 
@@ -15,20 +26,11 @@ Current state of Firefox WebExtension Api restricts opening of privileged urls (
 
 ### Screenshots
 
-![main](screenshots/main-assets/main.png)
-![tabs](screenshots/main-assets/tabs.png)
+![preview](screenshots/preview.png)
 
 ## FAQ
 
-#### When I click on `remove tab` button, nothing happens
-
-Click and hold button. Such action made to prevent accidental remove. Other buttons with such behavior are `Undo`, `Replace TabSet`, `Remove TabSet`.
-
-#### I don't need Window TabSets, can I hide them?
-
-Yes. Such preference available in addon's preferences. Click on cog icon in the panel's bottom right corner, to access preferences.
-
-#### What does `•` dot sumbol before tab's link means?
+#### What does `•` dot symbol before tab's link means?
 
 It means that tab is pinned.
 
@@ -36,17 +38,13 @@ It means that tab is pinned.
 
 It means that tab's container was removed
 
+#### Can I copy dragged tab? I do not want it to be removed from original session
+
+You can duplicate it by holding `cmd (mac)` or `ctrl (Win/Linux)` key, just as same as when you drag file in windows manager.
+
 #### Can I open TabSaver in sidebar?
 
-Yes, you can detach popup panel as well.
-
-#### Can I have tab's title near tab's link?
-
-Yes, available in preferences.
-
-#### Can I have tab's favicon near tab's link?
-
-Yes, available in preferences.
+Yes, look at **View -> Sidebar -> TabSaver**
 
 # How to build
 
@@ -60,101 +58,8 @@ And If you want to run extension in dev mode: `./node_modules/.bin/web-ext run -
 
 # CHANGELOG
 
-## `v.0.2.7`
+## `v.0.0.4`
 
-- Revert to 0.2.4 version as there are some complications with recent versions
-
-## `v.0.2.6`
-
-- Technical release
-
-## `v.0.2.5`
-
-- Style improvements. Code cleanup
-- Updated dependencies
-
-## `v.0.2.4`
-
-- Style improvements. Fixed controls interaction with text and scrollbars
-- Size of the window is now saved
-- Updated to Vue 3
-
-## `v.0.2.3`
-
-- Style improvements. Theme now obeys firefox's theme (dark, light)
-
-## `v.0.2.2`
-
-- Fixed active tab highlighting in Firefox versions >= 101
-  https://bugzilla.mozilla.org/show_bug.cgi?id=1779926
-
-## `v.0.2.1`
-
-- Fixed tab opening in private mode. Thanks to [Crikxi](https://github.com/Reeywhaar/tabsaver/pull/29)
-
-## `v.0.2.0`
-
-- Updated icon
-- Updated code dependencies
-
-## `v.0.1.7`
-
-- Updated dependencies
-
-## `v.0.1.6`
-
-- Updated dependencies
-
-## `v.0.1.5`
-
-- Option to open tab in same tab
-
-## `v.0.1.4`
-
-- Fixed import issue
-
-## `v.0.1.3`
-
-- Refine drag'n'drop
-- Minor refactoring
-
-## `v.0.1.2`
-
-- Show border over element when dragging
-
-## `v.0.1.1`
-
-### Features
-
-- Reload tab icon added (shift click to cache free reload, middle click to duplicate)
-- Reload all window tabs icon added (shift click to cache free reload)
-
-### Changes
-
-- Undo button's text changed to icon
-- Code fixes
-- Controls hover behavior
-
-## `v.0.1.0`
-
-### Features
-
-- Extension options page
-- Ability to manage window's tabs
-- Undo feature
-- Detachable panel
-- Sidebar panel
-- Color may be assigned to TabSet
-- Options to show tab's
-  - tab's title
-  - favicon
-  - count
-- Dark/light themes support
-
-### Fixes
-
-- Panel works in private window
-
-## `v.0.0.1`
+- Initial release. Some harsh moments are present but it gets work done
 
 There were dragons...
