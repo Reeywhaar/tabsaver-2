@@ -17,7 +17,7 @@
     "run": "source .env && ./node_modules/.bin/web-ext run -s ext --firefox-profile $WEB_EXT_FIREFOX_PROFILE",
     "run:nightly": "source .env && ./node_modules/.bin/web-ext run -f nightly -s ext --firefox-profile $WEB_EXT_FIREFOX_PROFILE",
     "test_data": "node make-test-data.js > private/test-data.json",
-    "icons:make": "node scripts/make-icons.js"
+    "icons:make": "node scripts/make_icons"
   },
   "repository": {
     "type": "git",
