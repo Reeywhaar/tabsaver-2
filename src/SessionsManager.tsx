@@ -90,7 +90,7 @@ export class SessionsManager {
     let wtab = cwindow.tabs?.at(0) ?? null
     for (const tab of tabs) {
       try {
-        this.openTab(tab, cwindow.id)
+        await this.openTab(tab, cwindow.id)
         if (wtab?.id) {
           await this.br.tabs.remove(wtab.id)
           wtab = null
