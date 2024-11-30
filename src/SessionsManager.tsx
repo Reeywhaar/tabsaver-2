@@ -54,7 +54,7 @@ export class SessionsManager {
   }
 
   async getInitialData() {
-    const windows = await this.br.windows.getAll({ populate: true, windowTypes: ['normal'] })
+    const windows = await this.br.windows.getAll({ populate: true })
     this.data.windows = []
     this.data.tabs = []
 
@@ -339,6 +339,7 @@ export class SessionsManager {
 
   private async serializeWindow(window: browser.windows.Window): Promise<WindowDescriptor | null> {
     if (!window.id) return null
+    if (window.type !== 'normal') return null
     return defineAll<WindowDescriptor>({
       id: window.id,
       associated_window_id: (await this.getAssociatedWindowId(window.id)) ?? undefined,
