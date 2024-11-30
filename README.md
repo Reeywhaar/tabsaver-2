@@ -58,6 +58,15 @@ And If you want to run extension in dev mode: `./node_modules/.bin/web-ext run -
 
 # CHANGELOG
 
+## `v.0.0.6`
+
+- Added tracking for active tab in session
+
+## `v.0.0.5`
+
+- Added button to discard (freeze) window tabs
+- Opening sessions tabs in discarded state (save resources)
+
 ## `v.0.0.4`
 
 - Initial release. Some harsh moments are present but it gets work done
