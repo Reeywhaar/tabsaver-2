@@ -11,5 +11,6 @@ export function convertStoredTabToTabCreateProperties(tab: SavedTabDescriptor): 
     index: index => ({ index }),
     cookie_store_id: cookieStoreId => ({ cookieStoreId }),
     favicon_url: () => ({}),
+    active: () => ({}),
   })
 }

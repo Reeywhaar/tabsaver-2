@@ -209,7 +209,11 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
 
   return (
     <div
-      className={classNames(tabClasses.tab, dragover === 'top' ? tabClasses.is_dragover_top : dragover === 'bottom' ? tabClasses.is_dragover_bottom : null)}
+      className={classNames(
+        tabClasses.tab,
+        { [tabClasses.is_active]: tab.active },
+        dragover === 'top' ? tabClasses.is_dragover_top : dragover === 'bottom' ? tabClasses.is_dragover_bottom : null
+      )}
       draggable={true}
       onAuxClick={handleAuxClick}
       ref={rootRef}

@@ -89,17 +89,15 @@ export class SessionsManager {
     this.setSessionAssociatedWindowId(session.session_id, associated_id)
     const wtab = cwindow.tabs?.at(0) ?? (await this.br.tabs.create({}))
     if (!wtab.id) throw new Error('Tab id is not defined')
+    const activeTab = tabs.find(t => t.active) || tabs.at(-1)
     for (const tab of tabs) {
       try {
         const ctab = await this.openTab(tab, cwindow.id)
-        const lastTab = tabs.findIndex(t => t === tab) === tabs.length - 1
-        if (lastTab) {
+        if (tab === activeTab) {
           if (ctab.id) {
             await this.br.tabs.update(ctab.id, { active: true })
           }
-          if (wtab?.id) {
-            await this.br.tabs.remove(wtab.id)
-          }
+          await this.br.tabs.remove(wtab.id)
         }
       } catch (e) {
         this.sendMessage({ type: 'error', message: asError(e).message })

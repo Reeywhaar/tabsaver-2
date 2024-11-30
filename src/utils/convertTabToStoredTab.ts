@@ -16,6 +16,7 @@ export const convertTabToStoredTab = (sessionId: string, tab: TabDescriptor): Sa
       cookie_store_id: tab.cookie_store_id,
       favicon_url: tab.favicon_url,
       title: tab.title,
+      active: tab.active,
     })
   )
 }

@@ -32,6 +32,7 @@ export const RT_SavedTabDescriptor = RT.object({
   pinned: RT.boolean().optional(),
   session_id: RT.string(),
   index: RT.number(),
+  active: RT.boolean().optional(),
   cookie_store_id: RT.string().optional(),
   favicon_url: RT.string().optional(),
 })
