@@ -5,7 +5,7 @@ export function convertStoredTabToTabCreateProperties(tab: SavedTabDescriptor): 
   return remapObject<SavedTabDescriptor, browser.tabs._CreateCreateProperties>(tab, {
     id: () => ({}),
     url: url => ({ url: url === 'about:newtab' ? undefined : url }),
-    title: () => ({}),
+    title: title => ({ title }),
     pinned: pinned => ({ pinned }),
     session_id: () => ({}),
     index: index => ({ index }),

@@ -19,7 +19,6 @@ import { convertStoredTabToTabCreateProperties } from './utils/convertStoredTabT
 import { convertTabToStoredTab } from './utils/convertTabToStoredTab'
 import { asError } from './utils/asError'
 import { URLMangler } from './URLMangler'
-import { sleep } from './utils/sleep'
 
 export class SessionsManager {
   data: SessionsDescriptor
@@ -88,23 +87,24 @@ export class SessionsManager {
     const associated_id = v4()
     await this.setWindowAssociatedWindowId(cwindow.id, associated_id)
     this.setSessionAssociatedWindowId(session.session_id, associated_id)
-    let wtab = cwindow.tabs?.at(0) ?? null
-    const discardIds: number[] = []
+    const wtab = cwindow.tabs?.at(0) ?? (await this.br.tabs.create({}))
+    if (!wtab.id) throw new Error('Tab id is not defined')
     for (const tab of tabs) {
       try {
-        const tabToDiscard = await this.openTab(tab, cwindow.id)
-        if (tabToDiscard) discardIds.push(tabToDiscard.id!)
-        if (wtab?.id) {
-          await this.br.tabs.remove(wtab.id)
-          wtab = null
+        const ctab = await this.openTab(tab, cwindow.id)
+        const lastTab = tabs.findIndex(t => t === tab) === tabs.length - 1
+        if (lastTab) {
+          if (ctab.id) {
+            await this.br.tabs.update(ctab.id, { active: true })
+          }
+          if (wtab?.id) {
+            await this.br.tabs.remove(wtab.id)
+          }
         }
       } catch (e) {
         this.sendMessage({ type: 'error', message: asError(e).message })
       }
     }
-    // todo: think of better solution to discard tabs rather than waiting a bit to fetch initial data
-    await sleep(500)
-    await this.br.tabs.discard(discardIds)
     await this.triggerUpdate()
   }
 
@@ -112,12 +112,11 @@ export class SessionsManager {
     let props = convertStoredTabToTabCreateProperties(tab)
     try {
       const discarded = !!props.url && !props.url.startsWith('about:')
-      const tab = await this.br.tabs.create({ ...props, windowId })
-      if (discarded) return tab
+      return await this.br.tabs.create({ ...props, windowId, active: false, discarded })
     } catch (e) {
       const mangler = new URLMangler(this.br)
       props = { ...props, url: mangler.getMangledURL(props.url!) }
-      await this.br.tabs.create({ ...props, windowId })
+      return await this.br.tabs.create({ ...props, active: false, windowId })
     }
   }
 
@@ -403,7 +402,7 @@ export class SessionsManager {
     try {
       await this.br.storage.local.set({ storedData: data })
     } catch (e) {
-      // todo: handle error
+      this.sendMessage({ type: 'error', message: asError(e).message })
     }
   }
 }
