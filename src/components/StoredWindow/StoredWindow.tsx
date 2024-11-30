@@ -14,7 +14,7 @@ import classNames from 'classnames'
 import { useWithErrorHandling } from '@app/hooks/useShowError'
 import { extractTabData, hasTabData } from '@app/utils/tabData'
 import { DRAGGABLE_SAVED_TAB_MIME, DRAGGABLE_TAB_MIME } from '@app/constants'
-import { assertNever } from '@app/utils/assertNever'
+import { assertNeverSilent } from '@app/utils/assertNever'
 import { useEvent } from '@app/hooks/useEvent'
 import { usePush } from '../Popup/PopupContext'
 import { RenamePopup } from '../RenamePopup/RenamePopup'
@@ -158,7 +158,7 @@ export const StoredWindow: FunctionComponent<StoredWindowProps> = ({ window }) =
           break
         }
         default:
-          assertNever(data)
+          assertNeverSilent(data)
       }
     })
 

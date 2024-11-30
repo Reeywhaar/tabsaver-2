@@ -23,7 +23,7 @@ import { excludedURLS } from '../Tab/Tab'
 import { useWithErrorHandling } from '@app/hooks/useShowError'
 import classNames from 'classnames'
 import { SessionsHelper } from '@app/SessionsHelper'
-import { assertNever } from '@app/utils/assertNever'
+import { assertNeverSilent } from '@app/utils/assertNever'
 
 export type StoredTabProps = {
   tab: SavedTabDescriptor
@@ -176,7 +176,7 @@ export const StoredTab: FunctionComponent<StoredTabProps> = ({ tab }) => {
           break
         }
         default:
-          return assertNever(data)
+          return assertNeverSilent(data)
       }
     })
 

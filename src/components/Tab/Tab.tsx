@@ -10,7 +10,7 @@ import { Icon } from '../Icon/Icon'
 import { useClickHandler } from '@app/hooks/useClickHandler'
 import { Spacer } from '../Spacer/Spacer'
 import { joinNodesWithIds } from '@app/utils/joinNodes'
-import { assertNever } from '@app/utils/assertNever'
+import { assertNeverSilent } from '@app/utils/assertNever'
 import { defineAll } from '@app/utils/defineAll'
 import { useEvent } from '@app/hooks/useEvent'
 import { convertStoredTabToTabCreateProperties } from '@app/utils/convertStoredTabToTabCreateProperties'
@@ -142,7 +142,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
           break
         }
         default:
-          assertNever(data)
+          assertNeverSilent(data)
       }
     })
 

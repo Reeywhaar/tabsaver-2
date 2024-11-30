@@ -12,7 +12,7 @@ import { Spacer } from '../Spacer/Spacer'
 
 import classes from './Window.module.scss'
 import { sendRuntimeMessage } from '@app/utils/sendRuntimeMessage'
-import { assertNever } from '@app/utils/assertNever'
+import { assertNeverSilent } from '@app/utils/assertNever'
 import { convertStoredTabToTabCreateProperties } from '@app/utils/convertStoredTabToTabCreateProperties'
 import { useEvent } from '@app/hooks/useEvent'
 import { useWithErrorHandling } from '@app/hooks/useShowError'
@@ -140,7 +140,7 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
           break
         }
         default:
-          assertNever(data)
+          assertNeverSilent(data)
       }
     })
 

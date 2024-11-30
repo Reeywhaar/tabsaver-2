@@ -1,7 +1,7 @@
 import { FunctionComponent, useEffect } from 'react'
 import { useBrowser } from '../DataProvider'
 import { OutgoingMessageDescriptor } from '@app/types'
-import { assertNever } from '@app/utils/assertNever'
+import { assertNeverSilent } from '@app/utils/assertNever'
 import { useShowError } from '@app/hooks/useShowError'
 
 export const ErrorListener: FunctionComponent = () => {
@@ -18,7 +18,7 @@ export const ErrorListener: FunctionComponent = () => {
         case 'update':
           break
         default:
-          assertNever(message)
+          assertNeverSilent(message)
       }
     }
 
