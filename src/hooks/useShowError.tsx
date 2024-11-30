@@ -1,3 +1,4 @@
+import React from 'react'
 import { useNotification } from '@app/components/Notifications/NotificationsContext'
 import { useEvent } from './useEvent'
 import { asError } from '@app/utils/asError'
@@ -8,7 +9,18 @@ export const useShowError = () => {
   return useEvent((error: unknown, timeout = 5000) => {
     const ctx = notify(_ctx => ({
       level: 'error',
-      description: extractMessage(asError(error)),
+      description: (
+        <React.Fragment>
+          {extractMessage(asError(error))
+            .split('\n')
+            .map((m, i) => (
+              <div key="i">
+                {i > 0 ? 'Cause: ' : null}
+                {m}
+              </div>
+            ))}
+        </React.Fragment>
+      ),
     }))
 
     setTimeout(() => {
@@ -17,7 +29,14 @@ export const useShowError = () => {
   })
 }
 
-const extractMessage = (error: Error) => error.message
+const extractMessage = (error: Error) => {
+  const strings = [error.message]
+  if (error.cause) strings.push(extractMessage(asError(error.cause)))
+  return strings
+    .map(s => s.trim())
+    .filter(s => !!s)
+    .join('\n')
+}
 
 export const useWithErrorHandling = () => {
   const showError = useShowError()
