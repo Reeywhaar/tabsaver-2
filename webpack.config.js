@@ -121,6 +121,7 @@ module.exports = (_h, args) => {
       ],
       optimization: {
         minimize: args.mode !== 'development',
+        runtimeChunk: 'single',
         splitChunks: {
           chunks: 'all',
         },
