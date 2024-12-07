@@ -5,7 +5,7 @@
 }
 
 .window_overlay {
-  background-color: transparentize($color: $accent, $amount: 0.8);
+  background-color: var(--accent_pale);
   position: absolute;
   top: 0;
   left: 0;
@@ -25,8 +25,8 @@
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  border-bottom: rpx(1) solid $gray_xx;
-  background-color: white;
+  border-bottom: rpx(1) solid var(--gray_xx);
+  background-color: var(--bg);
 }
 
 .window_title {
@@ -37,8 +37,8 @@
 }
 
 .window.is_active .window_top {
-  background-color: $accent;
-  color: white;
+  background-color: var(--accent);
+  color: var(--bg);
 }
 
 .icon {
@@ -51,6 +51,6 @@
   left: rpx(-4);
   width: rpx(8);
   height: rpx(8);
-  background-color: $incognito;
+  background-color: var(--incognito);
   border-radius: rpx(8);
 }

@@ -2,7 +2,7 @@
 
 .notification {
   pointer-events: all;
-  background: white;
+  background: var(--bg);
   padding: unit(0.5);
   border-radius: rpx(5);
 
@@ -12,11 +12,11 @@
 }
 
 .notification.is_info {
-  border-color: $info;
-  color: $info;
+  border-color: var(--info);
+  color: var(--info);
 }
 
 .notification.is_error {
-  border-color: $error;
-  color: $error;
+  border-color: var(--error);
+  color: var(--error);
 }

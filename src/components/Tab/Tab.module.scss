@@ -2,7 +2,7 @@
 
 .tab {
   padding: unit(0.2) unit(1);
-  background-color: white;
+  background-color: var(--bg);
   user-select: none;
   z-index: 1;
   position: relative;
@@ -19,7 +19,7 @@
 }
 
 .tab.is_active {
-  background-color: $accent_tab;
+  background-color: var(--accent_tab);
 }
 
 .tab.is_discarded {
@@ -27,18 +27,18 @@
 }
 
 .tab.is_window_active.is_active {
-  background-color: $accent_tab_window;
+  background-color: var(--accent_tab_window);
 }
 
 .tab.is_dragover_top {
   margin-top: -2px;
-  border-top: 2px dotted $accent;
+  border-top: 2px dotted var(--accent);
   z-index: 2;
 }
 
 .tab.is_dragover_bottom {
   margin-bottom: -2px;
-  border-bottom: 2px dotted $accent;
+  border-bottom: 2px dotted var(--accent);
   z-index: 2;
 }
 
@@ -61,6 +61,6 @@
   left: rpx(-4);
   width: rpx(8);
   height: rpx(8);
-  background-color: $accent;
+  background-color: var(--accent);
   border-radius: rpx(8);
 }

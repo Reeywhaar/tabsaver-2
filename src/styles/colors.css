@@ -1,0 +1,42 @@
+:root {
+  --text: #444;
+  --gray: #777;
+  --gray_xx: #ddd;
+  --gray_xxx: #eee;
+  --accent: #ecb80d;
+  --accent_pale: #ecb80dcc;
+  --accent_text: #d7a500;
+  --accent_tab: #f9f2dd;
+  --accent_tab_window: #f6e8bc;
+  --error: #bb3611;
+  --info: rgb(29, 113, 182);
+  --incognito: #661cdc;
+  --bg: white;
+  --overlay: rgba(0, 0, 0, 0.2);
+  --window-shadow: rgba(0, 0, 0, 0.6);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text: #ddd;
+    --gray: #999;
+    --gray_xx: #444;
+    --gray_xxx: #333;
+    --accent: #705706;
+    --accent_pale: #705706cc;
+    --accent_text: #705706;
+    --accent_tab: #705706cc;
+    --accent_tab_window: #52420e;
+    --error: #bb3611;
+    --info: rgb(29, 113, 182);
+    --incognito: #661cdc;
+    --bg: #232311;
+    --window-shadow: rgba(255, 255, 255, 0.4);
+  }
+}
+
+html,
+body {
+  color: var(--text);
+  background-color: var(--bg);
+}
