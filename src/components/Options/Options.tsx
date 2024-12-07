@@ -2,16 +2,17 @@ import React, { FunctionComponent, useRef } from 'react'
 
 import { IS_PRODUCTION } from '@app/constants'
 import { useBrowser, useDataUpdate, useStoredSessions } from '../DataProvider'
-import { Diagnostics } from '../Diagnostics/Diagnostics'
+import { Diagnostics } from '@app/components/Diagnostics/Diagnostics'
+import { useNotification } from '@app/components/Notifications/NotificationsContext'
 import { useEvent } from '@app/hooks/useEvent'
 
 import button from '@app/styles/button.module.scss'
-import classes from './Options.module.scss'
 import { RT_SavedSessionsDescriptor } from '@app/types'
 import { useTask } from '@app/packages/task/useTask'
 import { useShowError } from '@app/hooks/useShowError'
 import { wrapError } from '@app/utils/wrapError'
-import { useNotification } from '../Notifications/NotificationsContext'
+
+import classes from './Options.module.scss'
 
 export const Options: FunctionComponent = () => {
   const browser = useBrowser()
