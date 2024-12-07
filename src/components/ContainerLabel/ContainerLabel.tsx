@@ -1,4 +1,4 @@
-import { DEFAULT_COOKIE_STORE_ID } from '@app/constants'
+import { DEFAULT_COOKIE_STORE_ID, INCOGNITO_COOKIE_STORE_ID } from '@app/constants'
 import React, { CSSProperties, FunctionComponent, useEffect, useMemo } from 'react'
 import { useBrowser } from '../DataProvider'
 import { useTask } from '@app/packages/task/useTask'
@@ -12,6 +12,7 @@ export const ContainerLabel: FunctionComponent<{ id?: string }> = ({ id }) => {
   const cntResource = useTask(() => async () => {
     if (!id) return null
     if (id === DEFAULT_COOKIE_STORE_ID) return null
+    if (id === INCOGNITO_COOKIE_STORE_ID) return null
 
     const ctx = await br.contextualIdentities.get(id)
     return ctx
