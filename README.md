@@ -58,6 +58,10 @@ And If you want to run extension in dev mode: `./node_modules/.bin/web-ext run -
 
 # CHANGELOG
 
+## `v.0.0.8`
+
+- Fixed error with extension build
+
 ## `v.0.0.7`
 
 - Fix error by asserting cases
