@@ -128,7 +128,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
           const stab = getStoredTabs().find(t => t.id === data.id)
           if (!stab) return
           console.info('[Tabsaver] moving stored tab', data, 'to', tab.window_id, index ?? 'undefined')
-          const newTab = await browser.tabs.create({ ...convertStoredTabToTabCreateProperties(stab), windowId: tab.window_id, index })
+          const newTab = await browser.tabs.create({ ...convertStoredTabToTabCreateProperties(stab), title: undefined, windowId: tab.window_id, index })
           if (isNil(index)) {
             if (!newTab.id) throw new Error('Tab id is undefined')
             await browser.tabs.move(newTab.id, { index: 0 })
