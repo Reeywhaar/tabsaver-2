@@ -58,6 +58,11 @@ And If you want to run extension in dev mode: `./node_modules/.bin/web-ext run -
 
 # CHANGELOG
 
+## `v.0.0.9`
+
+- Added dark theme support
+- Fixed copy-open of saved tab
+
 ## `v.0.0.8`
 
 - Fixed error with extension build

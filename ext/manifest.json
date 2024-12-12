@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Tab Saver 2",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Allows you to manage window sessions",
   "icons": {
     "48": "icons/icon.svg",
