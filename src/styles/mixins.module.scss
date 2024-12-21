@@ -1,9 +1,5 @@
 @use 'sass:math';
 
-// todo: convert to css variabled
-// todo: add dark theme support
-// Colors
-
 // Converts px to em with 14px base
 @function rpx($n, $base: 16) {
   @return ($n * math.div(1, $base)) * 1rem;
