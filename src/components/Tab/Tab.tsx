@@ -1,5 +1,5 @@
 import { TabDescriptor, WindowDescriptor } from '@app/types'
-import React, { FunctionComponent, MouseEventHandler, ReactNode, useEffect, useRef, useState } from 'react'
+import React, { FunctionComponent, MouseEventHandler, ReactNode, useEffect, useMemo, useRef, useState } from 'react'
 import { useBrowser, useDataUpdate, useStoredSessions } from '../DataProvider'
 import { DRAGGABLE_SAVED_TAB_MIME, DRAGGABLE_TAB_MIME } from '@app/constants'
 import { DragTabData, extractTabData, hasTabData } from '@app/utils/tabData'
@@ -26,6 +26,13 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
   const [dragover, setDragover] = useState<null | 'top' | 'bottom'>()
   const { tabs: storedTabs } = useStoredSessions()
   const { updateStoredSessions } = useDataUpdate()
+  const discardable = useMemo(() => {
+    if (tab.active) return false
+    if (tab.discarded) return false
+    if (tab.url.startsWith('about:')) return false
+    if (tab.url.startsWith('chrome:')) return false
+    return true
+  }, [tab])
 
   const withErrorHandling = useWithErrorHandling()
 
@@ -51,6 +58,11 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
     e.preventDefault()
     e.stopPropagation()
     await browser.tabs.remove(tab.id)
+  })
+
+  const discardHandler = useClickHandler(async e => {
+    e.preventDefault()
+    await browser.tabs.discard(tab.id)
   })
 
   useEffect(() => {
@@ -201,6 +213,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
       </div>
       <Spacer />
       <ContainerLabel id={tab.cookie_store_id} />
+      {discardable && <Icon className={classes.tab_icon} name="power" title="Discard" {...discardHandler} />}
       <Icon className={classes.tab_icon} name="close" title="Close tab" {...removeHandler} />
     </div>
   )
@@ -217,4 +230,4 @@ const getTabData = (tab: TabDescriptor): string => {
   )
 }
 
-export const excludedURLS = ['about:newtab', 'about:home', 'about:blank']
+export const excludedURLS = ['about:newtab', 'about:home', 'about:blank', 'chrome://browser/content/blanktab.html']

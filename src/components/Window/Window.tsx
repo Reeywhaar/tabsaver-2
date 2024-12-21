@@ -82,9 +82,11 @@ export const Window: FunctionComponent<{ window: WindowDescriptor; index: number
   })
 
   const discardHandler = useClickHandler(async () => {
-    const activeTab = windowTabs.find(
-      t => t.url === 'about:newtab' || t.url === 'about:home' || t.url === 'about:blank' || t.url === 'chrome://browser/content/blanktab.html'
-    )
+    const activeTab =
+      windowTabs.find(
+        t => t.active && (t.url === 'about:newtab' || t.url === 'about:home' || t.url === 'about:blank' || t.url === 'chrome://browser/content/blanktab.html')
+      ) ??
+      windowTabs.find(t => t.url === 'about:newtab' || t.url === 'about:home' || t.url === 'about:blank' || t.url === 'chrome://browser/content/blanktab.html')
     if (activeTab) {
       browser.tabs.update(activeTab.id, { active: true })
     } else {
