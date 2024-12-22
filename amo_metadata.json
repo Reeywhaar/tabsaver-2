@@ -1,0 +1,9 @@
+{
+  "summary": {
+    "en-US": "WebExtension to manage your tabs, create window sessions to restore them later"
+  },
+  "categories": ["other"],
+  "version": {
+    "license": "BSD-2-Clause"
+  }
+}

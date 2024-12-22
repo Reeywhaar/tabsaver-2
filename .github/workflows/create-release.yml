@@ -27,13 +27,23 @@ jobs:
           cmd: build
           source: ext
 
+      - name: 'web-ext lint'
+        uses: kewisch/action-web-ext@v1
+        with:
+          cmd: lint
+          source: ext
+          channel: listed
+
       - name: 'web-ext sign'
         id: web-ext-sign
         uses: kewisch/action-web-ext@fe10addf5d5e5ba6b78ffde720dd488a27d10e8c
         with:
           cmd: sign
           source: ${{ steps.web-ext-build.outputs.target }}
-          channel: unlisted
+          channel: listed
+          metaDataFile: amo_metadata.json
+          license: BSD-3-Clause
+          licenseFile: LICENSE
           apiKey: ${{ secrets.FIREFOX_API_KEY }}
           apiSecret: ${{ secrets.FIREFOX_API_SECRET }}
 
