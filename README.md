@@ -2,6 +2,8 @@
 
 ![Logo](ext/icons/icon.svg)
 
+<a href="https://addons.mozilla.org/en-US/firefox/addon/tabsaver-2/"><img src="amo_badge.svg" width="172" height="60" alt="Install at Firefox Addons"></a>
+
 # Tab Saver
 
 WebExtension to manage your tabs.
@@ -13,12 +15,13 @@ Supports:
 
 - Drag and drop between tab sessions, even without saving session it is useful to drag tabs between multiple windows.
 - [Tab containers](https://support.mozilla.org/en-US/kb/how-use-firefox-containers)
+- Tabs and window discarding, so you can put window or a tab in a "sleep" mode so it won't use cpu
 
 # Install
 
-As of now you can install it from [Releases](https://github.com/Reeywhaar/tabsaver-2/releases/latest) page, while there is still some work to be done. Later it will be published in AMO
+[Install at Firefox Addons](https://addons.mozilla.org/en-US/firefox/addon/tabsaver-2/)
 
-<!-- [Install from addons.mozilla.org](https://addons.mozilla.org/en-US/firefox/addon/vyrtsev-tab-saver/) -->
+Additionally you can install it from [Releases](https://github.com/Reeywhaar/tabsaver-2/releases/latest)
 
 ### Caveats
 
