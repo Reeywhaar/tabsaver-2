@@ -1,5 +1,6 @@
 import { SessionsManager } from './SessionsManager'
 import { SessionsDescriptor, TabDescriptor } from './types'
+import { serialize } from './utils/serialize'
 
 describe('SessionsManager', () => {
   let br: typeof browser
@@ -14,7 +15,7 @@ describe('SessionsManager', () => {
       data: { tabs: [], windows: [] },
     })
     await manager.tabCreatedHandler(createTab({ url: 'https://example.com', id: 1 }))
-    expect(manager.data.tabs).toStrictEqual([createTabDescriptor({ url: 'https://example.com', id: 1 })])
+    expect(serialize(manager.data.tabs)).toStrictEqual([createTabDescriptor({ url: 'https://example.com', id: 1 })])
   })
   it('tabActivatedHandler', async () => {
     br = {
@@ -156,6 +157,7 @@ describe('SessionsManager', () => {
           {
             session_id: '0',
             title: 'title',
+            associated_window_id: '0',
           },
         ],
         tabs: [],
@@ -164,13 +166,13 @@ describe('SessionsManager', () => {
     await manager.updateStoredData()
     expect(manager.storedData).toStrictEqual({
       tabs: [
-        { id: '0.0', index: 0, url: 'https://example.com', window_session_id: '0' },
-        { id: '0.1', index: 1, url: 'https://example.com', window_session_id: '0' },
-        { id: '0.2', index: 2, url: 'https://example.com', window_session_id: '0' },
-        { id: '0.3', index: 3, url: 'https://example.com', window_session_id: '0' },
-        { id: '0.4', index: 4, url: 'https://example.com', window_session_id: '0' },
+        { active: true, session_id: '0', id: '0.0', index: 0, url: 'https://example.com' },
+        { active: false, session_id: '0', id: '0.1', index: 1, url: 'https://example.com' },
+        { active: false, session_id: '0', id: '0.2', index: 2, url: 'https://example.com' },
+        { active: false, session_id: '0', id: '0.3', index: 3, url: 'https://example.com' },
+        { active: false, session_id: '0', id: '0.4', index: 4, url: 'https://example.com' },
       ],
-      windows: [{ session_id: '0', title: 'title' }],
+      windows: [{ session_id: '0', title: 'title', associated_window_id: '0' }],
     })
   })
 })
@@ -194,7 +196,7 @@ const createTabDescriptor = (tab: Partial<TabDescriptor>): TabDescriptor => {
     ++windowIndexes[tab.window_id ?? 0]
     return index
   })()
-  return {
+  return serialize({
     id: 0,
     window_id: 0,
     active: undefined,
@@ -205,7 +207,7 @@ const createTabDescriptor = (tab: Partial<TabDescriptor>): TabDescriptor => {
     cookie_store_id: undefined,
     title: undefined,
     ...tab,
-  }
+  })
 }
 
 const createTab = (tab: Partial<browser.tabs.Tab>): browser.tabs.Tab => {
@@ -224,6 +226,7 @@ const createTab = (tab: Partial<browser.tabs.Tab>): browser.tabs.Tab => {
 
 const createWindow = (win: Partial<browser.windows.Window>): browser.windows.Window => {
   return {
+    type: 'normal',
     alwaysOnTop: false,
     focused: false,
     height: 0,
