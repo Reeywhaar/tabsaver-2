@@ -68,6 +68,9 @@ module.exports = (_h, args) => {
                 loader: 'sass-loader',
                 options: {
                   sourceMap: !isProduction,
+                  sassOptions: {
+                    silenceDeprecations: ['legacy-js-api'],
+                  },
                 },
               },
             ],
