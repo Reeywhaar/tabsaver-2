@@ -61,6 +61,11 @@ And If you want to run extension in dev mode: `./node_modules/.bin/web-ext run -
 
 # CHANGELOG
 
+## `v.0.0.12`
+
+- Updated dependencies
+- Fixed tests
+
 ## `v.0.0.11`
 
 - Uploaded to Mozilla Addons
