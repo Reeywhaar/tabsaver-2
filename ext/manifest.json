@@ -1,7 +1,7 @@
 {
   "manifest_version": 2,
   "name": "Tab Saver 2",
-  "version": "0.0.12",
+  "version": "0.0.13",
   "description": "Allows you to manage window sessions",
   "icons": {
     "48": "icons/icon.svg",
@@ -27,7 +27,15 @@
     "page": "dist/options.html",
     "browser_style": true
   },
-  "permissions": ["storage", "tabs", "downloads", "sessions", "cookies", "contextualIdentities", "unlimitedStorage"],
+  "permissions": [
+    "storage",
+    "tabs",
+    "downloads",
+    "sessions",
+    "cookies",
+    "contextualIdentities",
+    "unlimitedStorage"
+  ],
   "incognito": "spanning",
   "applications": {
     "gecko": {
