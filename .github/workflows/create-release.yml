@@ -31,7 +31,7 @@ jobs:
           source: ext
 
       - name: 'web-ext lint'
-        uses: kewisch/action-web-ext@v1
+        uses: kewisch/action-web-ext@fe10addf5d5e5ba6b78ffde720dd488a27d10e8c
         with:
           cmd: lint
           source: ext
