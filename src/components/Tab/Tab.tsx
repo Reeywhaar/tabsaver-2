@@ -27,7 +27,6 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
   const { tabs: storedTabs } = useStoredSessions()
   const { updateStoredSessions } = useDataUpdate()
   const discardable = useMemo(() => {
-    if (tab.active) return false
     if (tab.discarded) return false
     if (tab.url.startsWith('about:')) return false
     if (tab.url.startsWith('chrome:')) return false
@@ -62,6 +61,25 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
 
   const discardHandler = useClickHandler(async e => {
     e.preventDefault()
+    if (!tab.window_id) throw new Error('Tab window_id is undefined')
+    if (tab.active) {
+      const tabs = await browser.tabs.query({ windowId: tab.window_id, discarded: false })
+      const nextTab = (() => {
+        const index = tabs.findIndex(t => t.id === tab.id)
+        if (index === -1) throw new Error('Tab not found')
+        for (let i = index + 1; i < tabs.length; i++) {
+          return tabs[i]
+        }
+        for (let i = index - 1; i >= 0; i--) {
+          return tabs[i]
+        }
+      })()
+      if (nextTab && nextTab.id) {
+        await browser.tabs.update(nextTab.id, { active: true })
+      } else {
+        await browser.tabs.create({ windowId: tab.window_id, active: true })
+      }
+    }
     await browser.tabs.discard(tab.id)
   })
 
@@ -146,10 +164,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
             await browser.tabs.move(newTab.id, { index: 0 })
           }
           if (e.dataTransfer?.dropEffect === 'move') {
-            updateStoredSessions(stored => ({
-              ...stored,
-              tabs: stored.tabs.filter(t => t.id !== stab.id),
-            }))
+            updateStoredSessions(stored => ({ ...stored, tabs: stored.tabs.filter(t => t.id !== stab.id) }))
           }
           break
         }
@@ -220,14 +235,7 @@ export const Tab: FunctionComponent<{ tab: TabDescriptor; window?: WindowDescrip
 }
 
 const getTabData = (tab: TabDescriptor): string => {
-  return JSON.stringify(
-    defineAll<DragTabData>({
-      type: DRAGGABLE_TAB_MIME,
-      id: tab.id,
-      window_id: tab.window_id,
-      index: tab.index,
-    })
-  )
+  return JSON.stringify(defineAll<DragTabData>({ type: DRAGGABLE_TAB_MIME, id: tab.id, window_id: tab.window_id, index: tab.index }))
 }
 
 export const excludedURLS = ['about:newtab', 'about:home', 'about:blank', 'chrome://browser/content/blanktab.html']
